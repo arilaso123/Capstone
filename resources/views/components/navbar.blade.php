@@ -2,8 +2,8 @@
     <div class="container">
         <!-- Brand / Logo -->
         <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('home') }}">
-            <i class="bi bi-droplet-half text-mocha fs-4" style="color: var(--color-mocha);"></i>
-            <span>Uyuy Jastip</span>
+            <img src="{{ asset('images/logo-emblem.png') }}" alt="Uyuy Jastip Logo" style="height: 38px; width: auto; object-fit: contain;">
+            <span class="fw-bold font-heading">Uyuy Jastip</span>
         </a>
 
         <!-- Mobile Toggle Button -->

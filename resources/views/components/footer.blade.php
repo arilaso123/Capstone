@@ -4,8 +4,8 @@
             <!-- Brand & About -->
             <div class="col-lg-4 col-md-6">
                 <div class="d-flex align-items-center gap-2 mb-3">
-                    <i class="bi bi-droplet-half fs-3" style="color: var(--color-champagne);"></i>
-                    <h5 class="mb-0 text-white">Uyuy Jastip</h5>
+                    <img src="{{ asset('images/logo-emblem-light.png') }}" alt="Uyuy Jastip Logo" style="height: 38px; width: auto; object-fit: contain;">
+                    <h5 class="mb-0 text-white font-heading">Uyuy Jastip</h5>
                 </div>
                 <p class="small text-white-50">
                     Layanan jasa titip (jastip) parfum pilihan resmi dari <em>In Parfume</em>. Menghadirkan wewangian premium berkualitas, praktis, dan terpercaya dengan sistem pengelolaan pre-order yang terstruktur.

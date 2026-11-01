@@ -6,6 +6,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin Operasional') - Uyuy Jastip</title>
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
+
     <!-- Bootstrap 5.3 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -21,7 +25,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top border-bottom border-secondary">
         <div class="container-fluid px-3">
             <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('admin.dashboard') }}">
-                <i class="bi bi-droplet-half text-warning fs-5"></i>
+                <img src="{{ asset('images/logo-emblem-light.png') }}" alt="Uyuy Jastip Logo" style="height: 32px; width: auto; object-fit: contain;">
                 <span class="font-heading fw-bold">Uyuy Jastip</span>
                 <span class="badge bg-secondary ms-2 small">Admin Operasional</span>
             </a>

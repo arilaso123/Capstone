@@ -9,6 +9,7 @@
         <div class="row align-items-center g-5">
             <div class="col-lg-7">
                 <div class="d-flex align-items-center gap-2 mb-3">
+                    <img src="{{ asset('images/logo-emblem.png') }}" alt="Uyuy Jastip Emblem" style="height: 32px; width: auto; object-fit: contain;">
                     <span class="badge px-3 py-2 text-uppercase fw-semibold" style="background-color: var(--color-champagne); color: var(--color-charcoal); letter-spacing: 1px; font-size: 0.75rem;">
                         Official Jastip &bull; In Parfume Bandung
                     </span>

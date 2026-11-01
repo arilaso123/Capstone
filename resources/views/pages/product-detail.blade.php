@@ -77,10 +77,10 @@
                             <label class="form-label fw-bold small text-uppercase">Pilih Ukuran Botol:</label>
                             <div class="d-flex gap-3">
                                 <div class="form-check custom-option">
-                                    <input class="form-check-input" type="radio" name="size_ml" id="size35" value="35" data-price="75000">
+                                    <input class="form-check-input" type="radio" name="size_ml" id="size35" value="35" data-price="{{ (int)$product->getPriceForSize(35) }}">
                                     <label class="form-check-label px-3 py-2 border rounded-3 d-block cursor-pointer" for="size35">
                                         <div class="fw-bold">35 ml</div>
-                                        <div class="small text-muted">Rp 75.000</div>
+                                        <div class="small text-muted">Rp {{ number_format($product->getPriceForSize(35), 0, ',', '.') }}</div>
                                     </label>
                                 </div>
                                 <div class="form-check custom-option">
@@ -91,10 +91,10 @@
                                     </label>
                                 </div>
                                 <div class="form-check custom-option">
-                                    <input class="form-check-input" type="radio" name="size_ml" id="size100" value="100" data-price="135000">
+                                    <input class="form-check-input" type="radio" name="size_ml" id="size100" value="100" data-price="{{ (int)$product->getPriceForSize(100) }}">
                                     <label class="form-check-label px-3 py-2 border rounded-3 d-block cursor-pointer" for="size100">
                                         <div class="fw-bold">100 ml</div>
-                                        <div class="small text-muted">Rp 135.000</div>
+                                        <div class="small text-muted">Rp {{ number_format($product->getPriceForSize(100), 0, ',', '.') }}</div>
                                     </label>
                                 </div>
                             </div>

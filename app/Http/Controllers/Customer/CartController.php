@@ -44,12 +44,8 @@ class CartController extends Controller
 
         $product = Product::findOrFail($validated['product_id']);
 
-        // Pricing logic: base price for 60ml, proportional adjustment for 35ml & 100ml
-        $unitPrice = match ((int)$validated['size_ml']) {
-            35 => 75000,
-            100 => 135000,
-            default => (float)$product->price,
-        };
+        // Pricing logic: dynamic price by size from official In Parfume tier
+        $unitPrice = $product->getPriceForSize((int)$validated['size_ml']);
 
         $cartKey = $product->id . '_' . $validated['size_ml'];
         $cart = session()->get('cart', []);

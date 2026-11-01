@@ -8,9 +8,7 @@
         <div class="col-md-9 col-lg-7">
             <div class="card card-uyuy p-4 p-md-5 shadow-sm">
                 <div class="text-center mb-4">
-                    <div class="stat-icon mx-auto mb-2" style="background: var(--color-champagne-light); color: var(--color-mocha);">
-                        <i class="bi bi-person-plus-fill fs-4"></i>
-                    </div>
+                    <img src="{{ asset('images/logo-emblem.png') }}" alt="Uyuy Jastip" class="mb-2" style="height: 60px; width: auto; object-fit: contain;">
                     <h3 class="fw-bold font-heading mb-1">Pendaftaran Akun Pelanggan</h3>
                     <p class="text-secondary small">Buat akun untuk melakukan pre-order parfum dan memantau pesanan Anda.</p>
                 </div>

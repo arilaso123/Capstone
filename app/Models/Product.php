@@ -40,5 +40,19 @@ class Product extends Model
     {
         return $query->where('is_active', true);
     }
+
+    /**
+     * Get price dynamically for size (35ml, 60ml, 100ml) based on official In Parfume tier.
+     */
+    public function getPriceForSize(int $sizeMl): float
+    {
+        if ($sizeMl === 35) {
+            return (float) ($this->price >= 110000 ? 85000 : ($this->price >= 90000 ? 65000 : 55000));
+        }
+        if ($sizeMl === 100) {
+            return (float) ($this->price >= 110000 ? 180000 : ($this->price >= 90000 ? 140000 : 120000));
+        }
+        return (float) $this->price;
+    }
 }
 

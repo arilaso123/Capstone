@@ -14,6 +14,32 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
+    <!-- Tailwind CSS with Custom Design Tokens -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            corePlugins: {
+                preflight: false,
+            },
+            theme: {
+                extend: {
+                    colors: {
+                        mocha: '#8B6B50',
+                        'mocha-hover': '#72563F',
+                        champagne: '#D8C5AE',
+                        'champagne-light': '#F4ECE3',
+                        ivory: '#FDFBF7',
+                        espresso: '#2D241E',
+                    },
+                    fontFamily: {
+                        heading: ['"Playfair Display"', 'Georgia', 'serif'],
+                        sans: ['"Inter"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
     <!-- Custom Uyuy Jastip Theme -->
     <link rel="stylesheet" href="{{ asset('css/uyuy-theme.css') }}">
 
@@ -34,7 +60,7 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
 
-            <div class="collapse navbar-collapse" id="adminTopNav">
+            <div class="collapse navbar-collapse" id="adminTopNav" style="visibility: visible !important;">
                 <ul class="navbar-nav ms-auto align-items-center gap-3">
                     <li class="nav-item">
                         <a href="{{ route('home') }}" class="nav-link text-white-50" target="_blank">

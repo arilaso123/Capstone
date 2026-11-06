@@ -70,7 +70,7 @@
                                     <th>Parfum</th>
                                     <th>Ukuran</th>
                                     <th>Harga</th>
-                                    <th class="text-center" style="width: 160px;">Jumlah</th>
+                                    <th class="text-center" style="min-width: 160px;">Jumlah</th>
                                     <th>Subtotal</th>
                                     <th style="width: 50px;"></th>
                                 </tr>
@@ -85,28 +85,40 @@
                                         <td><span class="badge bg-light text-dark border">{{ $item['size_ml'] }} ml</span></td>
                                         <td>Rp {{ number_format($item['price'], 0, ',', '.') }}</td>
                                         <td>
-                                            <div class="d-flex align-items-center justify-content-center gap-1">
-                                                <form action="{{ route('customer.cart.update', $key) }}" method="POST">
-                                                    @csrf
-                                                    <input type="hidden" name="quantity" value="{{ max(1, $item['quantity'] - 1) }}">
-                                                    <button type="submit" class="btn btn-sm btn-outline-secondary" @disabled($item['quantity'] <= 1) title="Kurangi jumlah" aria-label="Kurangi jumlah">
+                                            {{-- Form qty: tombol +/- langsung submit otomatis --}}
+                                            <form action="{{ route('customer.cart.update', $key) }}"
+                                                  method="POST"
+                                                  class="cart-qty-form"
+                                                  id="qty-form-{{ $loop->index }}">
+                                                @csrf
+                                                <div class="d-flex align-items-center justify-content-center gap-1">
+                                                    <button type="submit"
+                                                        class="btn btn-sm btn-outline-secondary cart-qty-minus"
+                                                        data-target="qty-{{ $loop->index }}"
+                                                        {{ $item['quantity'] <= 1 ? 'disabled' : '' }}
+                                                        title="Kurangi jumlah" aria-label="Kurangi jumlah">
                                                         <i class="bi bi-dash"></i>
                                                     </button>
-                                                </form>
-                                                <form action="{{ route('customer.cart.update', $key) }}" method="POST">
-                                                    @csrf
-                                                    <input type="number" name="quantity" value="{{ $item['quantity'] }}" min="1" max="50" class="form-control form-control-sm text-center" style="width: 64px;" aria-label="Jumlah botol {{ $item['name'] }}" onchange="this.form.submit()">
-                                                </form>
-                                                <form action="{{ route('customer.cart.update', $key) }}" method="POST">
-                                                    @csrf
-                                                    <input type="hidden" name="quantity" value="{{ min(50, $item['quantity'] + 1) }}">
-                                                    <button type="submit" class="btn btn-sm btn-outline-secondary" @disabled($item['quantity'] >= 50) title="Tambah jumlah" aria-label="Tambah jumlah">
+                                                    <input type="number"
+                                                        name="quantity"
+                                                        id="qty-{{ $loop->index }}"
+                                                        value="{{ $item['quantity'] }}"
+                                                        min="1" max="50"
+                                                        class="form-control form-control-sm text-center cart-qty-input"
+                                                        style="width: 60px;"
+                                                        data-index="{{ $loop->index }}"
+                                                        aria-label="Jumlah botol {{ $item['name'] }}">
+                                                    <button type="submit"
+                                                        class="btn btn-sm btn-outline-secondary cart-qty-plus"
+                                                        data-target="qty-{{ $loop->index }}"
+                                                        {{ $item['quantity'] >= 50 ? 'disabled' : '' }}
+                                                        title="Tambah jumlah" aria-label="Tambah jumlah">
                                                         <i class="bi bi-plus"></i>
                                                     </button>
-                                                </form>
-                                            </div>
+                                                </div>
+                                            </form>
                                         </td>
-                                        <td class="fw-bold">Rp {{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}</td>
+                                        <td class="fw-bold" id="subtotal-{{ $loop->index }}">Rp {{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}</td>
                                         <td>
                                             <form action="{{ route('customer.cart.remove', $key) }}" method="POST" onsubmit="return confirm('Hapus item ini dari keranjang?')">
                                                 @csrf
@@ -207,3 +219,74 @@
     @endif
 </div>
 @endsection
+
+@push('styles')
+<style>
+/* Sembunyikan panah spinner bawaan browser pada input number di keranjang */
+.cart-qty-input::-webkit-outer-spin-button,
+.cart-qty-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.cart-qty-input[type=number] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+</style>
+@endpush
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // Tombol minus — set nilai lalu submit
+    document.querySelectorAll('.cart-qty-minus').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            const form  = btn.closest('.cart-qty-form');
+            const input = form.querySelector('.cart-qty-input');
+            if (!input) return;
+            let val = parseInt(input.value) || 1;
+            if (val > 1) {
+                input.value = val - 1;
+                form.submit();
+            }
+        });
+    });
+
+    // Tombol plus — set nilai lalu submit
+    document.querySelectorAll('.cart-qty-plus').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            const form  = btn.closest('.cart-qty-form');
+            const input = form.querySelector('.cart-qty-input');
+            if (!input) return;
+            let val = parseInt(input.value) || 1;
+            if (val < 50) {
+                input.value = val + 1;
+                form.submit();
+            }
+        });
+    });
+
+    // Input diketik manual — submit saat blur (pindah fokus)
+    document.querySelectorAll('.cart-qty-input').forEach(function (input) {
+        input.addEventListener('blur', function () {
+            let val = parseInt(input.value) || 1;
+            if (val < 1) val = 1;
+            if (val > 50) val = 50;
+            input.value = val;
+            input.closest('.cart-qty-form').submit();
+        });
+
+        // Tekan Enter juga submit
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                input.blur();
+            }
+        });
+    });
+});
+</script>
+@endpush

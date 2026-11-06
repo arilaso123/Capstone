@@ -3,6 +3,13 @@
 @section('title', $product->name . ' — Uyuy Jastip')
 
 @section('content')
+@php
+    $selectedSize = (int) request('size_ml', 60);
+    if (! in_array($selectedSize, [35, 60, 100], true)) {
+        $selectedSize = 60;
+    }
+    $initialPrice = $product->getPriceForSize($selectedSize);
+@endphp
 <!-- Breadcrumbs -->
 <div class="py-3 border-bottom" style="background-color: var(--color-warm-ivory);">
     <div class="container">
@@ -61,8 +68,8 @@
                 <div class="p-3 rounded-3 mb-4" style="background: #FFFFFF; border: 1px solid var(--color-soft-gray);">
                     <div class="small text-muted mb-1">Harga Pre-Order (Jastip):</div>
                     <div class="d-flex align-items-baseline gap-2">
-                        <span class="fs-2 fw-bold text-dark" id="displayPrice">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
-                        <span class="text-muted small" id="displayUnit">/ botol (Ukuran {{ $product->size_ml }} ml)</span>
+                        <span class="fs-2 fw-bold text-dark" id="displayPrice">Rp {{ number_format($initialPrice, 0, ',', '.') }}</span>
+                        <span class="text-muted small" id="displayUnit">/ botol (Ukuran {{ $selectedSize }} ml)</span>
                     </div>
                 </div>
 
@@ -77,22 +84,22 @@
                             <label class="form-label fw-bold small text-uppercase">Pilih Ukuran Botol:</label>
                             <div class="d-flex gap-3">
                                 <div class="form-check custom-option">
-                                    <input class="form-check-input" type="radio" name="size_ml" id="size35" value="35" data-price="{{ (int)$product->getPriceForSize(35) }}">
-                                    <label class="form-check-label px-3 py-2 border rounded-3 d-block cursor-pointer" for="size35">
+                                    <input class="form-check-input" type="radio" name="size_ml" id="size35" value="35" data-price="{{ (int)$product->getPriceForSize(35) }}" @checked($selectedSize === 35)>
+                                    <label class="form-check-label px-3 py-2 border rounded-3 d-block cursor-pointer {{ $selectedSize === 35 ? 'border-mocha' : '' }}" for="size35" @if($selectedSize === 35) style="border-color: var(--color-mocha) !important; background: var(--color-warm-ivory);" @endif>
                                         <div class="fw-bold">35 ml</div>
                                         <div class="small text-muted">Rp {{ number_format($product->getPriceForSize(35), 0, ',', '.') }}</div>
                                     </label>
                                 </div>
                                 <div class="form-check custom-option">
-                                    <input class="form-check-input" type="radio" name="size_ml" id="size60" value="60" data-price="{{ (int)$product->price }}" checked>
-                                    <label class="form-check-label px-3 py-2 border rounded-3 d-block cursor-pointer border-mocha" for="size60" style="border-color: var(--color-mocha) !important; background: var(--color-warm-ivory);">
+                                    <input class="form-check-input" type="radio" name="size_ml" id="size60" value="60" data-price="{{ (int)$product->price }}" @checked($selectedSize === 60)>
+                                    <label class="form-check-label px-3 py-2 border rounded-3 d-block cursor-pointer {{ $selectedSize === 60 ? 'border-mocha' : '' }}" for="size60" @if($selectedSize === 60) style="border-color: var(--color-mocha) !important; background: var(--color-warm-ivory);" @endif>
                                         <div class="fw-bold text-mocha">60 ml (Favorit)</div>
                                         <div class="small text-muted">Rp {{ number_format($product->price, 0, ',', '.') }}</div>
                                     </label>
                                 </div>
                                 <div class="form-check custom-option">
-                                    <input class="form-check-input" type="radio" name="size_ml" id="size100" value="100" data-price="{{ (int)$product->getPriceForSize(100) }}">
-                                    <label class="form-check-label px-3 py-2 border rounded-3 d-block cursor-pointer" for="size100">
+                                    <input class="form-check-input" type="radio" name="size_ml" id="size100" value="100" data-price="{{ (int)$product->getPriceForSize(100) }}" @checked($selectedSize === 100)>
+                                    <label class="form-check-label px-3 py-2 border rounded-3 d-block cursor-pointer {{ $selectedSize === 100 ? 'border-mocha' : '' }}" for="size100" @if($selectedSize === 100) style="border-color: var(--color-mocha) !important; background: var(--color-warm-ivory);" @endif>
                                         <div class="fw-bold">100 ml</div>
                                         <div class="small text-muted">Rp {{ number_format($product->getPriceForSize(100), 0, ',', '.') }}</div>
                                     </label>
@@ -182,6 +189,7 @@
             });
 
             radios.forEach(r => r.addEventListener('change', updatePrice));
+            updatePrice();
         }
     });
 </script>

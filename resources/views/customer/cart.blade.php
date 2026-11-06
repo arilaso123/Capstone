@@ -70,7 +70,7 @@
                                     <th>Parfum</th>
                                     <th>Ukuran</th>
                                     <th>Harga</th>
-                                    <th class="text-center" style="width: 90px;">Jumlah</th>
+                                    <th class="text-center" style="width: 160px;">Jumlah</th>
                                     <th>Subtotal</th>
                                     <th style="width: 50px;"></th>
                                 </tr>
@@ -84,8 +84,27 @@
                                         </td>
                                         <td><span class="badge bg-light text-dark border">{{ $item['size_ml'] }} ml</span></td>
                                         <td>Rp {{ number_format($item['price'], 0, ',', '.') }}</td>
-                                        <td class="text-center fw-semibold">
-                                            {{ $item['quantity'] }}
+                                        <td>
+                                            <div class="d-flex align-items-center justify-content-center gap-1">
+                                                <form action="{{ route('customer.cart.update', $key) }}" method="POST">
+                                                    @csrf
+                                                    <input type="hidden" name="quantity" value="{{ max(1, $item['quantity'] - 1) }}">
+                                                    <button type="submit" class="btn btn-sm btn-outline-secondary" @disabled($item['quantity'] <= 1) title="Kurangi jumlah" aria-label="Kurangi jumlah">
+                                                        <i class="bi bi-dash"></i>
+                                                    </button>
+                                                </form>
+                                                <form action="{{ route('customer.cart.update', $key) }}" method="POST">
+                                                    @csrf
+                                                    <input type="number" name="quantity" value="{{ $item['quantity'] }}" min="1" max="50" class="form-control form-control-sm text-center" style="width: 64px;" aria-label="Jumlah botol {{ $item['name'] }}" onchange="this.form.submit()">
+                                                </form>
+                                                <form action="{{ route('customer.cart.update', $key) }}" method="POST">
+                                                    @csrf
+                                                    <input type="hidden" name="quantity" value="{{ min(50, $item['quantity'] + 1) }}">
+                                                    <button type="submit" class="btn btn-sm btn-outline-secondary" @disabled($item['quantity'] >= 50) title="Tambah jumlah" aria-label="Tambah jumlah">
+                                                        <i class="bi bi-plus"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </td>
                                         <td class="fw-bold">Rp {{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}</td>
                                         <td>

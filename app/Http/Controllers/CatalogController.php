@@ -12,6 +12,27 @@ class CatalogController extends Controller
     {
         $activePo = PoPeriod::active()->first();
 
+        $categories = Product::active()
+            ->whereNotNull('category')
+            ->where('category', '!=', '')
+            ->distinct()
+            ->orderBy('category')
+            ->pluck('category');
+
+        // Setiap parfum dijual dalam 35, 60, dan 100 ml di halaman detail.
+        // Kolom products.size_ml hanya menyimpan ukuran acuan (60 ml), jadi
+        // pilihan ukuran di katalog mengubah harga yang ditampilkan, bukan menyembunyikan produk.
+        $availableSizes = [35, 60, 100];
+        $selectedSize = (int) $request->input('size_ml');
+        if (! in_array($selectedSize, $availableSizes, true)) {
+            $selectedSize = null;
+        }
+
+        $selectedCategory = $request->input('category');
+        if (! $categories->contains($selectedCategory)) {
+            $selectedCategory = null;
+        }
+
         $query = Product::active();
 
         if ($request->filled('search')) {
@@ -23,17 +44,20 @@ class CatalogController extends Controller
             });
         }
 
-        if ($request->filled('category')) {
-            $query->where('category', 'like', '%' . $request->input('category') . '%');
-        }
-
-        if ($request->filled('size_ml')) {
-            $query->where('size_ml', $request->input('size_ml'));
+        if ($selectedCategory) {
+            $query->where('category', $selectedCategory);
         }
 
         $products = $query->latest()->paginate(8)->withQueryString();
 
-        return view('pages.catalog', compact('activePo', 'products'));
+        return view('pages.catalog', compact(
+            'activePo',
+            'products',
+            'categories',
+            'availableSizes',
+            'selectedSize',
+            'selectedCategory'
+        ));
     }
 }
 

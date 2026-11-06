@@ -62,6 +62,7 @@ Route::prefix('pelanggan')->middleware(['auth', 'role:customer'])->group(functio
     // Cart & Checkout
     Route::get('/keranjang', [CustomerCartController::class, 'index'])->name('customer.cart');
     Route::post('/keranjang/tambah', [CustomerCartController::class, 'add'])->name('customer.cart.add');
+    Route::post('/keranjang/jumlah/{key}', [CustomerCartController::class, 'update'])->name('customer.cart.update');
     Route::post('/keranjang/hapus/{key}', [CustomerCartController::class, 'remove'])->name('customer.cart.remove');
     Route::post('/checkout', [CustomerCartController::class, 'checkout'])->name('customer.checkout.post');
 

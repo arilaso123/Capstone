@@ -50,8 +50,9 @@ class CartController extends Controller
         $cartKey = $product->id . '_' . $validated['size_ml'];
         $cart = session()->get('cart', []);
 
+        $addedQty = (int) $validated['quantity'];
         if (isset($cart[$cartKey])) {
-            $cart[$cartKey]['quantity'] += (int)$validated['quantity'];
+            $cart[$cartKey]['quantity'] = min(50, $cart[$cartKey]['quantity'] + $addedQty);
         } else {
             $cart[$cartKey] = [
                 'product_id' => $product->id,
@@ -59,7 +60,7 @@ class CartController extends Controller
                 'brand' => $product->brand,
                 'size_ml' => (int)$validated['size_ml'],
                 'price' => $unitPrice,
-                'quantity' => (int)$validated['quantity'],
+                'quantity' => min(50, $addedQty),
                 'image_path' => $product->image_path,
             ];
         }
@@ -67,6 +68,28 @@ class CartController extends Controller
         session()->put('cart', $cart);
 
         return redirect()->route('customer.cart')->with('success', "{$product->name} ({$validated['size_ml']}ml) berhasil ditambahkan ke keranjang pre-order.");
+    }
+
+    public function update(Request $request, $key)
+    {
+        $validated = $request->validate([
+            'quantity' => ['required', 'integer', 'min:1', 'max:50'],
+        ], [
+            'quantity.required' => 'Jumlah botol wajib diisi.',
+            'quantity.integer' => 'Jumlah botol harus berupa angka.',
+            'quantity.min' => 'Jumlah botol minimal 1.',
+            'quantity.max' => 'Jumlah botol maksimal 50 per item.',
+        ]);
+
+        $cart = session()->get('cart', []);
+        if (! isset($cart[$key])) {
+            return redirect()->route('customer.cart')->with('error', 'Item tidak ditemukan di keranjang.');
+        }
+
+        $cart[$key]['quantity'] = (int) $validated['quantity'];
+        session()->put('cart', $cart);
+
+        return redirect()->route('customer.cart');
     }
 
     public function remove($key)

@@ -45,34 +45,46 @@
                 <div class="col-md-4 col-lg-3">
                     <select name="category" class="form-select">
                         <option value="">Semua Kategori Aroma</option>
-                        <option value="Amber" {{ request('category') === 'Amber' ? 'selected' : '' }}>Amber / Floral</option>
-                        <option value="Woody" {{ request('category') === 'Woody' ? 'selected' : '' }}>Woody / Aromatic</option>
-                        <option value="Fresh" {{ request('category') === 'Fresh' ? 'selected' : '' }}>Fresh / Aquatic</option>
-                        <option value="Gourmand" {{ request('category') === 'Gourmand' ? 'selected' : '' }}>Sweet / Gourmand</option>
-                        <option value="Lavender" {{ request('category') === 'Lavender' ? 'selected' : '' }}>Floral / Lavender</option>
-                        <option value="Vanilla" {{ request('category') === 'Vanilla' ? 'selected' : '' }}>Vanilla</option>
+                        @foreach($categories as $category)
+                            <option value="{{ $category }}" {{ $selectedCategory === $category ? 'selected' : '' }}>{{ $category }}</option>
+                        @endforeach
                     </select>
                 </div>
                 <div class="col-md-4 col-lg-2">
-                    <select name="size_ml" class="form-select">
-                        <option value="">Semua Ukuran</option>
-                        <option value="35" {{ request('size_ml') == '35' ? 'selected' : '' }}>35 ml</option>
-                        <option value="60" {{ request('size_ml') == '60' ? 'selected' : '' }}>60 ml</option>
-                        <option value="100" {{ request('size_ml') == '100' ? 'selected' : '' }}>100 ml</option>
+                    <select name="size_ml" class="form-select" aria-label="Tampilkan harga menurut ukuran">
+                        <option value="">Harga ukuran acuan</option>
+                        @foreach($availableSizes as $size)
+                            <option value="{{ $size }}" {{ (int) $selectedSize === $size ? 'selected' : '' }}>Harga {{ $size }} ml</option>
+                        @endforeach
                     </select>
                 </div>
                 <div class="col-md-4 col-lg-2 d-flex gap-1">
                     <button type="submit" class="btn btn-mocha w-100">
                         <i class="bi bi-funnel"></i> Terapkan
                     </button>
-                    @if(request('search') || request('category') || request('size_ml'))
+                    @if(request('search') || $selectedCategory || $selectedSize)
                         <a href="{{ route('catalog') }}" class="btn btn-outline-secondary" title="Reset">
                             <i class="bi bi-x-lg"></i>
                         </a>
                     @endif
                 </div>
             </div>
+            <div class="small text-muted mt-2">
+                Kategori mengikuti aroma yang benar-benar ada di katalog. Semua parfum bisa dipesan 35, 60, dan 100 ml; pilihan ukuran hanya mengubah harga di kartu.
+            </div>
         </form>
+    </div>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <p class="small text-muted mb-0">
+            Menampilkan {{ $products->total() }} parfum
+            @if($selectedCategory)
+                · {{ $selectedCategory }}
+            @endif
+            @if($selectedSize)
+                · harga {{ $selectedSize }} ml
+            @endif
+        </p>
     </div>
 
     <!-- Active PO Alert -->
@@ -97,6 +109,11 @@
     <!-- Product Grid -->
     <div class="row g-4">
         @forelse($products as $product)
+            @php
+                $cardSize = $selectedSize ?: $product->size_ml;
+                $cardPrice = $selectedSize ? $product->getPriceForSize($selectedSize) : $product->price;
+                $detailUrl = route('product.detail', $product->id) . ($selectedSize ? '?size_ml=' . $selectedSize : '');
+            @endphp
             <div class="col-sm-6 col-lg-4 col-xl-3">
                 <div class="card card-uyuy product-card h-100 d-flex flex-column">
                     <div class="product-card-img-wrapper position-relative overflow-hidden" style="height: 240px; background-color: var(--color-warm-ivory);">
@@ -113,7 +130,7 @@
                             </div>
                         @endif
                         <span class="badge position-absolute top-0 end-0 m-2 bg-light text-dark border">
-                            {{ $product->size_ml }} ml
+                            {{ $cardSize }} ml
                         </span>
                         @if($product->category)
                             <span class="badge position-absolute bottom-0 start-0 m-2 bg-dark bg-opacity-75 text-white">
@@ -125,7 +142,7 @@
                     <div class="p-4 d-flex flex-column flex-grow-1">
                         <span class="text-uppercase fw-semibold text-muted mb-1" style="font-size: 0.72rem; letter-spacing: 0.5px;">{{ $product->brand ?? 'In Parfume' }}</span>
                         <h5 class="fw-bold mb-2 font-heading">
-                            <a href="{{ route('product.detail', $product->id) }}" class="text-decoration-none text-dark hover-mocha">
+                            <a href="{{ $detailUrl }}" class="text-decoration-none text-dark hover-mocha">
                                 {{ $product->name }}
                             </a>
                         </h5>
@@ -135,10 +152,10 @@
 
                         <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-auto">
                             <div>
-                                <span class="text-muted small d-block" style="font-size: 0.75rem;">Mulai dari</span>
-                                <span class="fw-bold text-dark fs-5">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
+                                <span class="text-muted small d-block" style="font-size: 0.75rem;">{{ $selectedSize ? 'Harga ' . $selectedSize . ' ml' : 'Harga acuan' }}</span>
+                                <span class="fw-bold text-dark fs-5">Rp {{ number_format($cardPrice, 0, ',', '.') }}</span>
                             </div>
-                            <a href="{{ route('product.detail', $product->id) }}" class="btn btn-mocha btn-sm d-flex align-items-center gap-1">
+                            <a href="{{ $detailUrl }}" class="btn btn-mocha btn-sm d-flex align-items-center gap-1">
                                 Detail <i class="bi bi-chevron-right" style="font-size: 0.75rem;"></i>
                             </a>
                         </div>

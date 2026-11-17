@@ -81,14 +81,14 @@
                                     <th class="border-0 rounded-start-3">Parfum</th>
                                     <th class="border-0">Ukuran</th>
                                     <th class="border-0">Harga</th>
-                                    <th class="text-center border-0" style="width: 80px;">Jumlah</th>
+                                    <th class="text-center border-0" style="min-width: 145px;">Jumlah</th>
                                     <th class="border-0">Subtotal</th>
                                     <th class="border-0 rounded-end-3" style="width: 44px;"></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($cart as $key => $item)
-                                    <tr style="border-bottom: 1px solid rgba(216, 197, 174, 0.25);">
+                                    <tr class="cart-item-row" data-price="{{ (int) $item['price'] }}" style="border-bottom: 1px solid rgba(216, 197, 174, 0.25);">
                                         <td class="py-3">
                                             <div class="fw-bold font-heading text-dark">{{ $item['name'] }}</div>
                                             <div class="small text-muted" style="font-size: 0.75rem;">{{ $item['brand'] ?? 'In Parfume' }}</div>
@@ -99,10 +99,43 @@
                                             </span>
                                         </td>
                                         <td class="py-3 small text-secondary">Rp {{ number_format($item['price'], 0, ',', '.') }}</td>
-                                        <td class="text-center py-3 fw-bold text-dark">
-                                            {{ $item['quantity'] }}
+                                        <td class="text-center py-3">
+                                            <form action="{{ route('customer.cart.update', $key) }}"
+                                                  method="POST"
+                                                  class="cart-qty-form d-inline-block"
+                                                  id="qty-form-{{ $loop->index }}"
+                                                  data-price="{{ (int) $item['price'] }}">
+                                                @csrf
+                                                <div class="d-inline-flex align-items-center rounded-pill p-1" style="background: #FAF8F5; border: 1px solid rgba(216, 197, 174, 0.55);">
+                                                    <button type="button"
+                                                        class="btn btn-light rounded-circle d-flex align-items-center justify-content-center shadow-none p-0 cart-qty-minus"
+                                                        style="width: 28px; height: 28px; border: 1px solid rgba(216, 197, 174, 0.4);"
+                                                        data-target="qty-{{ $loop->index }}"
+                                                        {{ $item['quantity'] <= 1 ? 'disabled' : '' }}
+                                                        title="Kurangi jumlah" aria-label="Kurangi jumlah">
+                                                        <i class="bi bi-dash"></i>
+                                                    </button>
+                                                    <input type="number"
+                                                        name="quantity"
+                                                        id="qty-{{ $loop->index }}"
+                                                        value="{{ $item['quantity'] }}"
+                                                        min="1" max="50"
+                                                        class="form-control form-control-sm border-0 bg-transparent text-center fw-bold text-dark shadow-none cart-qty-input p-0"
+                                                        style="width: 44px;"
+                                                        data-index="{{ $loop->index }}"
+                                                        aria-label="Jumlah botol {{ $item['name'] }}">
+                                                    <button type="button"
+                                                        class="btn btn-light rounded-circle d-flex align-items-center justify-content-center shadow-none p-0 cart-qty-plus"
+                                                        style="width: 28px; height: 28px; border: 1px solid rgba(216, 197, 174, 0.4);"
+                                                        data-target="qty-{{ $loop->index }}"
+                                                        {{ $item['quantity'] >= 50 ? 'disabled' : '' }}
+                                                        title="Tambah jumlah" aria-label="Tambah jumlah">
+                                                        <i class="bi bi-plus"></i>
+                                                    </button>
+                                                </div>
+                                            </form>
                                         </td>
-                                        <td class="py-3 fw-bold font-heading text-dark">
+                                        <td class="py-3 fw-bold font-heading text-dark item-subtotal" id="subtotal-{{ $loop->index }}">
                                             Rp {{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}
                                         </td>
                                         <td class="py-3 text-end">
@@ -125,7 +158,7 @@
                         </a>
                         <div class="text-end mt-2 mt-sm-0">
                             <span class="text-muted small d-block" style="font-size: 0.78rem;">Total Belanja Parfum:</span>
-                            <h4 class="fw-bold font-heading mb-0 text-dark">Rp {{ number_format($total, 0, ',', '.') }}</h4>
+                            <h4 class="fw-bold font-heading mb-0 text-dark" id="cartTotalLeft">Rp {{ number_format($total, 0, ',', '.') }}</h4>
                         </div>
                     </div>
                 </x-card>
@@ -188,8 +221,8 @@
                         <!-- Payment Information Summary Box -->
                         <div class="p-3 rounded-4 mb-4" style="background: #FAF8F5; border: 1.5px solid rgba(216, 197, 174, 0.45);">
                             <div class="d-flex justify-content-between small text-secondary mb-2">
-                                <span>Subtotal Barang ({{ array_sum(array_column($cart, 'quantity')) }} botol)</span>
-                                <strong class="text-dark">Rp {{ number_format($total, 0, ',', '.') }}</strong>
+                                <span>Subtotal Barang (<span id="cartTotalBottles">{{ array_sum(array_column($cart, 'quantity')) }}</span> botol)</span>
+                                <strong class="text-dark" id="cartSubtotalRight">Rp {{ number_format($total, 0, ',', '.') }}</strong>
                             </div>
                             <div class="d-flex justify-content-between small text-secondary mb-2">
                                 <span>Ongkos Kirim</span>
@@ -198,7 +231,7 @@
                             <hr class="my-2" style="border-color: rgba(216, 197, 174, 0.35);">
                             <div class="d-flex justify-content-between align-items-center">
                                 <span class="fw-bold text-dark">Total Tagihan Pre-Order:</span>
-                                <h5 class="fw-bold font-heading text-dark mb-0 fs-4">Rp {{ number_format($total, 0, ',', '.') }}</h5>
+                                <h5 class="fw-bold font-heading text-dark mb-0 fs-4" id="cartTotalRight">Rp {{ number_format($total, 0, ',', '.') }}</h5>
                             </div>
                         </div>
 
@@ -224,3 +257,154 @@
     @endif
 </div>
 @endsection
+
+@push('styles')
+<style>
+.cart-qty-input::-webkit-outer-spin-button,
+.cart-qty-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.cart-qty-input[type=number] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+</style>
+@endpush
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+    function formatRupiah(amount) {
+        return 'Rp ' + Number(amount).toLocaleString('id-ID');
+    }
+
+    function recalculateCartUI() {
+        let grandTotal = 0;
+        let totalBottles = 0;
+
+        document.querySelectorAll('.cart-item-row').forEach(function (row) {
+            const unitPrice = parseInt(row.getAttribute('data-price')) || 0;
+            const input = row.querySelector('.cart-qty-input');
+            const minusBtn = row.querySelector('.cart-qty-minus');
+            const plusBtn = row.querySelector('.cart-qty-plus');
+            const subtotalEl = row.querySelector('.item-subtotal');
+
+            let qty = parseInt(input?.value) || 1;
+            if (qty < 1) qty = 1;
+            if (qty > 50) qty = 50;
+
+            const itemSubtotal = unitPrice * qty;
+            grandTotal += itemSubtotal;
+            totalBottles += qty;
+
+            if (subtotalEl) {
+                subtotalEl.textContent = formatRupiah(itemSubtotal);
+            }
+            if (minusBtn) {
+                minusBtn.disabled = (qty <= 1);
+            }
+            if (plusBtn) {
+                plusBtn.disabled = (qty >= 50);
+            }
+        });
+
+        const totalLeft = document.getElementById('cartTotalLeft');
+        const totalRight = document.getElementById('cartTotalRight');
+        const subtotalRight = document.getElementById('cartSubtotalRight');
+        const bottlesEl = document.getElementById('cartTotalBottles');
+
+        if (totalLeft) totalLeft.textContent = formatRupiah(grandTotal);
+        if (totalRight) totalRight.textContent = formatRupiah(grandTotal);
+        if (subtotalRight) subtotalRight.textContent = formatRupiah(grandTotal);
+        if (bottlesEl) bottlesEl.textContent = totalBottles;
+    }
+
+    function syncQuantityToServer(form, quantity) {
+        if (!window.fetch || !csrfToken) {
+            form.submit();
+            return;
+        }
+
+        fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ quantity: quantity })
+        })
+        .then(function (res) {
+            if (!res.ok) throw new Error('Network response was not ok');
+            return res.json();
+        })
+        .then(function (data) {
+            if (data && data.success) {
+                recalculateCartUI();
+            }
+        })
+        .catch(function () {
+            form.submit();
+        });
+    }
+
+    document.querySelectorAll('.cart-qty-minus').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            const form = btn.closest('.cart-qty-form');
+            const input = form.querySelector('.cart-qty-input');
+            if (!input) return;
+
+            let val = parseInt(input.value) || 1;
+            if (val > 1) {
+                input.value = val - 1;
+                recalculateCartUI();
+                syncQuantityToServer(form, val - 1);
+            }
+        });
+    });
+
+    document.querySelectorAll('.cart-qty-plus').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            const form = btn.closest('.cart-qty-form');
+            const input = form.querySelector('.cart-qty-input');
+            if (!input) return;
+
+            let val = parseInt(input.value) || 1;
+            if (val < 50) {
+                input.value = val + 1;
+                recalculateCartUI();
+                syncQuantityToServer(form, val + 1);
+            }
+        });
+    });
+
+    document.querySelectorAll('.cart-qty-input').forEach(function (input) {
+        input.addEventListener('input', function () {
+            recalculateCartUI();
+        });
+
+        input.addEventListener('change', function () {
+            let val = parseInt(input.value) || 1;
+            if (val < 1) val = 1;
+            if (val > 50) val = 50;
+            input.value = val;
+            recalculateCartUI();
+            syncQuantityToServer(input.closest('.cart-qty-form'), val);
+        });
+
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                input.blur();
+            }
+        });
+    });
+});
+</script>
+@endpush

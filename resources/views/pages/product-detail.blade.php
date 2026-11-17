@@ -150,7 +150,7 @@
                                 <button class="btn btn-light rounded-circle d-flex align-items-center justify-content-center shadow-none p-0" type="button" id="btnMinus" style="width: 38px; height: 38px; border: 1px solid rgba(216, 197, 174, 0.4);">
                                     <i class="bi bi-dash fs-5"></i>
                                 </button>
-                                <input type="number" class="form-control border-0 bg-transparent text-center fw-bold fs-6 shadow-none" name="quantity" id="qtyInput" value="1" min="1" max="20" style="width: 60px;">
+                                <input type="number" class="form-control border-0 bg-transparent text-center fw-bold fs-6 shadow-none" name="quantity" id="qtyInput" value="1" min="1" max="50" style="width: 60px;">
                                 <button class="btn btn-light rounded-circle d-flex align-items-center justify-content-center shadow-none p-0" type="button" id="btnPlus" style="width: 38px; height: 38px; border: 1px solid rgba(216, 197, 174, 0.4);">
                                     <i class="bi bi-plus fs-5"></i>
                                 </button>
@@ -247,7 +247,18 @@
             });
 
             plus.addEventListener('click', function() {
-                qty.value = parseInt(qty.value) + 1;
+                if ((parseInt(qty.value) || 1) < 50) {
+                    qty.value = (parseInt(qty.value) || 1) + 1;
+                    updatePrice();
+                }
+            });
+
+            qty.addEventListener('input', updatePrice);
+            qty.addEventListener('change', function() {
+                let val = parseInt(qty.value) || 1;
+                if (val < 1) val = 1;
+                if (val > 50) val = 50;
+                qty.value = val;
                 updatePrice();
             });
 

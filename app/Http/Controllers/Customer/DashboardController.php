@@ -14,7 +14,7 @@ class DashboardController extends Controller
         $user = Auth::user();
         $customer = $user->customer;
 
-        $activePo = PoPeriod::active()->first();
+        $activePo = PoPeriod::cachedActive();
 
         $ordersQuery = $customer ? $customer->orders() : Order::whereNull('id');
 

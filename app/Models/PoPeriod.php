@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Cache;
 
 class PoPeriod extends Model
 {
@@ -37,6 +38,21 @@ class PoPeriod extends Model
         return $this->status === self::STATUS_OPEN;
     }
 
+    public function isWithinOrderWindow(): bool
+    {
+        $todayWib = now('Asia/Jakarta')->toDateString();
+
+        return $this->start_date
+            && $this->end_date
+            && $this->start_date->toDateString() <= $todayWib
+            && $this->end_date->toDateString() >= $todayWib;
+    }
+
+    public function isOrderableNow(): bool
+    {
+        return $this->isOpen() && $this->isWithinOrderWindow();
+    }
+
     public function isClosed(): bool
     {
         return $this->status === self::STATUS_CLOSED;
@@ -54,7 +70,21 @@ class PoPeriod extends Model
 
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where('status', self::STATUS_OPEN);
+        $todayWib = now('Asia/Jakarta')->toDateString();
+
+        return $query->where('status', self::STATUS_OPEN)
+            ->whereDate('start_date', '<=', $todayWib)
+            ->whereDate('end_date', '>=', $todayWib);
+    }
+
+    public static function cachedActive(): ?self
+    {
+        return Cache::remember('po.active-window', now()->addSeconds(30), fn () => static::active()->first());
+    }
+
+    public static function clearActiveCache(): void
+    {
+        Cache::forget('po.active-window');
     }
 }
 

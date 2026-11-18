@@ -1,26 +1,55 @@
-/.phpunit.cache
+# Dependencies
 /node_modules
-/public/build
-/public/hot
-/public/storage
-/storage/*.key
-/storage/pail
 /vendor
+
+# Environment & Secrets (Never commit .env)
 .env
 .env.backup
 .env.production
-.phpactor.json
+.env.*.local
+/storage/*.key
+/auth.json
+
+# Local Testing, Scratch & Fixtures
+/scratch/
+/qa-screenshots/
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+*.log
+test.png
+__pycache__/
+*.pyc
+
+# Local Skill Workspaces & AI Artefacts
+/.agents
+/skills
+/.scroll-craft-src/
+/scrollcraft/
+
+# User Uploads & Private Storage
+/storage/app/private/*
+/storage/app/payment_proofs/*
+/storage/app/refunds/*
+!/storage/app/.gitignore
+!/storage/app/public/.gitignore
+
+# Build & Cache
+/.phpunit.cache
 .phpunit.result.cache
-Homestead.json
-Homestead.yaml
+/public/build
+/public/hot
+/public/storage
 npm-debug.log
 yarn-error.log
-/auth.json
+
+# IDE & OS Junk
 /.fleet
 /.idea
 /.nova
 /.vscode
 /.zed
-/.agents
-/skills
-
+.DS_Store
+Thumbs.db
+desktop.ini

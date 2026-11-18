@@ -1,0 +1,41 @@
+================================================================================
+FINANCIAL RECONCILIATION AUDIT REPORT (PHASE 3D)
+================================================================================
+Execution Time: 2026-11-15T15:00:40+00:00
+Batch PO: PO Batch 10 - Synthetic Reconciliation
+Product: Parfum Vanilla Oud (Price updated after ORD-008 to Rp 180.000 / Cost Rp 120.000)
+
+1. DATASET EXECUTION RESULTS
+ - ORD-001: Verified, In Progress (Processing) | Qty: 1 x 150000 = Rp 150.000 | Status: Diproses | Payment: Valid
+ - ORD-002: Verified, Shipped | Qty: 2 x 95000 = Rp 190.000 | Status: Barang Dikirim | Payment: Valid
+ - ORD-003: Verified, Completed | Qty: 1 x 250000 = Rp 250.000 | Status: Selesai | Payment: Valid
+ - ORD-004: Pending Verification, Waiting Payment | Qty: 1 x 150000 = Rp 150.000 | Status: Menunggu Pembayaran | Payment: Menunggu Verifikasi
+ - ORD-005: Unpaid, Waiting Payment | Qty: 1 x 95000 = Rp 95.000 | Status: Menunggu Pembayaran | Payment: Menunggu Verifikasi
+ - ORD-006: Rejected Payment, Waiting Payment | Qty: 1 x 150000 = Rp 150.000 | Status: Menunggu Pembayaran | Payment: Ditolak
+ - ORD-007: Verified then Cancelled with Full Refund | Qty: 1 x 150000 = Rp 150.000 | Status: Dibatalkan | Payment: Valid
+ - ORD-008: Verified with Variant Price Updated Later | Qty: 1 x 150000 = Rp 150.000 | Status: Pembayaran Diverifikasi | Payment: Valid
+
+2. PRICE SNAPSHOT INTEGRITY CHECK
+ - ORD-008 Stored Unit Price Snapshot: Rp 150.000 (Expected: Rp 150.000) -> PASS
+ - ORD-008 Stored Cost Price Snapshot: Rp 100.000 (Expected: Rp 100.000) -> PASS
+ - Current Active Variant Price: Rp 180.000 (Cost: Rp 120.000)
+ - Snapshot Isolation Result: 100% PRESERVED
+
+3. METRIC RECONCILIATION TABLE
+Metric                                    Expected      System        Variance    Status
+------------------------------------------------------------------------------------------
+Total Orders                              8             8             0           PASS
+Verified Orders Count                     5             5             0           PASS
+Unpaid Orders Count                       3             3             0           PASS
+Completed Orders Count                    1             1             0           PASS
+Cancelled Orders Count                    1             1             0           PASS
+Procurement Total Items (Verified Only)   6             6             0           PASS
+Verified Gross Revenue (Rp)               890000        890000        0           PASS
+Procurement Total Cost (Rp)               590000        590000        0           PASS
+Total Recorded Refund (Rp)                150000        150000        0           PASS
+
+4. BUSINESS FINANCIAL INTERPRETATION & EXCLUSION RULES
+ - Revenue Recognition Rule: CONFIRMED. Orders in 'Menunggu Pembayaran' with unverified payment (ORD-004 pending: Rp 150.000, ORD-005 unpaid: Rp 95.000, ORD-006 rejected: Rp 150.000) are strictly EXCLUDED from verified revenue.
+ - Procurement Item Aggregation: CONFIRMED. Only verified orders are aggregated for procurement (6 items total). Unpaid/unverified items are excluded from vendor purchasing lists.
+ - Cancellation & Refund Accounting: ORD-007 payment (Rp 150.000) was verified prior to cancellation. System records full refund of Rp 150.000 with reference BCA-REF-SYN-007. Gross verified receipts = Rp 890.000. Net receipts after refund = Rp 740.000.
+================================================================================

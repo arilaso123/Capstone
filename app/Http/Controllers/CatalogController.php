@@ -10,12 +10,18 @@ class CatalogController extends Controller
 {
     public function index(Request $request)
     {
-        $activePo = PoPeriod::active()->first();
+        $validated = $request->validate([
+            'search' => ['nullable', 'string', 'max:100'],
+            'category' => ['nullable', 'string', 'max:100'],
+            'size_ml' => ['nullable', 'integer', 'in:35,60,100'],
+        ]);
+
+        $activePo = PoPeriod::cachedActive();
 
         $query = Product::active();
 
-        if ($request->filled('search')) {
-            $search = $request->input('search');
+        if (!empty($validated['search'])) {
+            $search = $validated['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%")
@@ -23,15 +29,15 @@ class CatalogController extends Controller
             });
         }
 
-        if ($request->filled('category')) {
-            $query->where('category', 'like', '%' . $request->input('category') . '%');
+        if (!empty($validated['category'])) {
+            $query->where('category', 'like', '%' . $validated['category'] . '%');
         }
 
-        if ($request->filled('size_ml')) {
-            $query->where('size_ml', $request->input('size_ml'));
+        if (!empty($validated['size_ml'])) {
+            $query->whereHas('variants', fn ($variants) => $variants->where('size_ml', $validated['size_ml']));
         }
 
-        $products = $query->latest()->paginate(8)->withQueryString();
+        $products = $query->with('variants')->latest()->paginate(8)->withQueryString();
 
         return view('pages.catalog', compact('activePo', 'products'));
     }

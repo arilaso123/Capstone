@@ -3,145 +3,67 @@
 @section('title', 'Daftar Akun Pelanggan')
 
 @section('content')
-<div class="container py-5 my-md-3">
-    <div class="row justify-content-center">
-        <div class="col-md-9 col-lg-7">
-            <!-- Floating Luxury Card -->
-            <x-card class="p-4 p-md-5 border-0 shadow">
-                <!-- Header Emblem -->
-                <div class="text-center mb-4 pb-2">
-                    <div class="d-inline-flex p-3 rounded-circle mb-3" style="background-color: var(--color-champagne-light); box-shadow: 0 4px 14px rgba(216, 197, 174, 0.4);">
-                        <img src="{{ asset('images/logo-emblem.png') }}" alt="Uyuy Jastip" style="height: 52px; width: auto; object-fit: contain;">
+<div class="container py-5 auth-page auth-register-page">
+    <div class="auth-card-column auth-card-column-wide">
+        <section class="auth-card" aria-labelledby="register-heading">
+            <header class="auth-card-header">
+                <img src="{{ asset('images/logo-emblem.png') }}" alt="Uyuy Jastip" class="auth-brand-mark">
+                <p class="home-eyebrow">Pendaftaran</p>
+                <h1 id="register-heading">Buat akun pelanggan</h1>
+                <p>Daftar untuk membuat pesanan pre-order dan memantau perkembangannya.</p>
+            </header>
+
+            <form action="{{ route('register.post') }}" method="POST" class="auth-form auth-register-form">
+                @csrf
+                <div class="auth-register-grid">
+                    <div class="customer-checkout-field">
+                        <label for="name">Nama lengkap <span aria-hidden="true">*</span></label>
+                        <input type="text" id="name" name="name" value="{{ old('name') }}" autocomplete="name" required placeholder="Nama lengkap Anda" aria-invalid="{{ $errors->has('name') ? 'true' : 'false' }}" @if($errors->has('name')) aria-describedby="name-error" @endif>
+                        @error('name')<p class="customer-checkout-error" id="name-error">{{ $message }}</p>@enderror
                     </div>
-                    <h3 class="font-heading mb-2" style="font-size: 1.75rem;">Pendaftaran Akun Pelanggan</h3>
-                    <p class="text-secondary small mb-0">Buat akun untuk melakukan pre-order parfum dan memantau pesanan Anda secara transparan.</p>
+                    <div class="customer-checkout-field">
+                        <label for="email">Alamat email <span aria-hidden="true">*</span></label>
+                        <input type="email" id="email" name="email" value="{{ old('email') }}" autocomplete="email" required placeholder="nama@email.com" aria-invalid="{{ $errors->has('email') ? 'true' : 'false' }}" @if($errors->has('email')) aria-describedby="email-error" @endif>
+                        @error('email')<p class="customer-checkout-error" id="email-error">{{ $message }}</p>@enderror
+                    </div>
+                    <div class="customer-checkout-field">
+                        <label for="phone_number">Nomor WhatsApp <span aria-hidden="true">*</span></label>
+                        <input type="tel" id="phone_number" name="phone_number" value="{{ old('phone_number') }}" autocomplete="tel" required placeholder="08123456789" aria-invalid="{{ $errors->has('phone_number') ? 'true' : 'false' }}" aria-describedby="{{ $errors->has('phone_number') ? 'phone-help phone-error' : 'phone-help' }}">
+                        <small id="phone-help">Gunakan nomor aktif untuk konfirmasi pesanan dan pengiriman.</small>
+                        @error('phone_number')<p class="customer-checkout-error" id="phone-error">{{ $message }}</p>@enderror
+                    </div>
+                    <div class="customer-checkout-field">
+                        <label for="city">Kota atau kabupaten</label>
+                        <input type="text" id="city" name="city" value="{{ old('city') }}" autocomplete="address-level2" placeholder="Contoh: Bandung" aria-invalid="{{ $errors->has('city') ? 'true' : 'false' }}" @if($errors->has('city')) aria-describedby="city-error" @endif>
+                        @error('city')<p class="customer-checkout-error" id="city-error">{{ $message }}</p>@enderror
+                    </div>
+                    <div class="customer-checkout-field">
+                        <label for="postal_code">Kode pos <span class="customer-checkout-optional">Opsional</span></label>
+                        <input type="text" id="postal_code" name="postal_code" value="{{ old('postal_code') }}" inputmode="numeric" maxlength="5" pattern="[0-9]{5}" autocomplete="postal-code" placeholder="40123" aria-invalid="{{ $errors->has('postal_code') ? 'true' : 'false' }}" @if($errors->has('postal_code')) aria-describedby="postal-code-error" @endif>
+                        @error('postal_code')<p class="customer-checkout-error" id="postal-code-error">{{ $message }}</p>@enderror
+                    </div>
+                    <div class="customer-checkout-field auth-register-address">
+                        <label for="address">Alamat pengiriman <span class="customer-checkout-optional">Opsional</span></label>
+                        <textarea id="address" name="address" rows="3" autocomplete="street-address" placeholder="Jalan, nomor rumah, RT/RW, kelurahan, dan kecamatan" aria-invalid="{{ $errors->has('address') ? 'true' : 'false' }}" @if($errors->has('address')) aria-describedby="address-error" @endif>{{ old('address') }}</textarea>
+                        @error('address')<p class="customer-checkout-error" id="address-error">{{ $message }}</p>@enderror
+                    </div>
+                    <div class="customer-checkout-field">
+                        <label for="password">Kata sandi <span aria-hidden="true">*</span></label>
+                        <input type="password" id="password" name="password" autocomplete="new-password" required placeholder="Minimal 8 karakter" aria-invalid="{{ $errors->has('password') ? 'true' : 'false' }}" @if($errors->has('password')) aria-describedby="password-error" @endif>
+                        @error('password')<p class="customer-checkout-error" id="password-error">{{ $message }}</p>@enderror
+                    </div>
+                    <div class="customer-checkout-field">
+                        <label for="password_confirmation">Konfirmasi kata sandi <span aria-hidden="true">*</span></label>
+                        <input type="password" id="password_confirmation" name="password_confirmation" autocomplete="new-password" required placeholder="Ulangi kata sandi">
+                    </div>
                 </div>
 
-                <form action="{{ route('register.post') }}" method="POST">
-                    @csrf
+                <label class="auth-terms"><input type="checkbox" id="terms" required><span>Saya memahami bahwa pembayaran diverifikasi secara manual oleh Admin dan persetujuan akun tunduk pada ketentuan layanan.</span></label>
+                <button type="submit" class="auth-submit">Buat akun pelanggan <span aria-hidden="true">→</span></button>
+            </form>
 
-                    <div class="row g-3">
-                        <!-- Nama Lengkap -->
-                        <div class="col-md-6">
-                            <label for="name" class="form-label small fw-semibold text-secondary mb-1">
-                                Nama Lengkap <span class="text-danger">*</span>
-                            </label>
-                            <div class="input-group-uyuy d-flex align-items-center @error('name') border-danger @enderror">
-                                <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                <input type="text" class="form-control form-control-uyuy" id="name" name="name" value="{{ old('name') }}" required placeholder="Nama lengkap Anda">
-                            </div>
-                            @error('name')
-                                <div class="text-danger small mt-1 ps-1" style="font-size: 0.82rem;">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- Email -->
-                        <div class="col-md-6">
-                            <label for="email" class="form-label small fw-semibold text-secondary mb-1">
-                                Alamat Email <span class="text-danger">*</span>
-                            </label>
-                            <div class="input-group-uyuy d-flex align-items-center @error('email') border-danger @enderror">
-                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                                <input type="email" class="form-control form-control-uyuy" id="email" name="email" value="{{ old('email') }}" required placeholder="contoh@gmail.com">
-                            </div>
-                            @error('email')
-                                <div class="text-danger small mt-1 ps-1" style="font-size: 0.82rem;">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- No WhatsApp -->
-                        <div class="col-md-6">
-                            <label for="phone_number" class="form-label small fw-semibold text-secondary mb-1">
-                                No. WhatsApp / HP <span class="text-danger">*</span>
-                            </label>
-                            <div class="input-group-uyuy d-flex align-items-center @error('phone_number') border-danger @enderror">
-                                <span class="input-group-text"><i class="bi bi-whatsapp"></i></span>
-                                <input type="tel" class="form-control form-control-uyuy" id="phone_number" name="phone_number" value="{{ old('phone_number') }}" required placeholder="08123456789">
-                            </div>
-                            <span class="text-muted d-block ps-1 mt-1" style="font-size: 0.72rem;">Digunakan admin untuk konfirmasi pesanan dan resi pengiriman.</span>
-                            @error('phone_number')
-                                <div class="text-danger small mt-1 ps-1" style="font-size: 0.82rem;">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- Kota -->
-                        <div class="col-md-6">
-                            <label for="city" class="form-label small fw-semibold text-secondary mb-1">
-                                Kota / Kabupaten
-                            </label>
-                            <div class="input-group-uyuy d-flex align-items-center @error('city') border-danger @enderror">
-                                <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
-                                <input type="text" class="form-control form-control-uyuy" id="city" name="city" value="{{ old('city') }}" placeholder="Contoh: Jakarta Selatan">
-                            </div>
-                            @error('city')
-                                <div class="text-danger small mt-1 ps-1" style="font-size: 0.82rem;">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- Alamat Lengkap -->
-                        <div class="col-12">
-                            <label for="address" class="form-label small fw-semibold text-secondary mb-1">
-                                Alamat Pengiriman Lengkap
-                            </label>
-                            <div class="input-group-uyuy p-1 @error('address') border-danger @enderror">
-                                <textarea class="form-control border-0 bg-transparent shadow-none" id="address" name="address" rows="2" placeholder="Nama jalan, nomor rumah, RT/RW, kelurahan, kecamatan, kode pos...">{{ old('address') }}</textarea>
-                            </div>
-                            @error('address')
-                                <div class="text-danger small mt-1 ps-1" style="font-size: 0.82rem;">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- Kata Sandi -->
-                        <div class="col-md-6">
-                            <label for="password" class="form-label small fw-semibold text-secondary mb-1">
-                                Kata Sandi <span class="text-danger">*</span>
-                            </label>
-                            <div class="input-group-uyuy d-flex align-items-center @error('password') border-danger @enderror">
-                                <span class="input-group-text"><i class="bi bi-shield-lock"></i></span>
-                                <input type="password" class="form-control form-control-uyuy" id="password" name="password" required placeholder="Minimal 8 karakter">
-                            </div>
-                            @error('password')
-                                <div class="text-danger small mt-1 ps-1" style="font-size: 0.82rem;">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- Konfirmasi Sandi -->
-                        <div class="col-md-6">
-                            <label for="password_confirmation" class="form-label small fw-semibold text-secondary mb-1">
-                                Konfirmasi Kata Sandi <span class="text-danger">*</span>
-                            </label>
-                            <div class="input-group-uyuy d-flex align-items-center">
-                                <span class="input-group-text"><i class="bi bi-shield-check"></i></span>
-                                <input type="password" class="form-control form-control-uyuy" id="password_confirmation" name="password_confirmation" required placeholder="Ulangi kata sandi">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Terms Checkbox -->
-                    <div class="form-check mt-4 mb-4">
-                        <input class="form-check-input" type="checkbox" id="terms" required style="border-color: #D8C5AE; cursor: pointer;">
-                        <label class="form-check-label small text-secondary" for="terms" style="cursor: pointer; line-height: 1.5;">
-                            Saya menyetujui ketentuan pre-order Uyuy Jastip dan memahami bahwa verifikasi transfer pembayaran dilakukan secara manual oleh admin.
-                        </label>
-                    </div>
-
-                    <!-- Submit Button -->
-                    <div class="d-grid mb-3">
-                        <x-button type="submit" variant="mocha" class="py-3 shadow-sm" icon="bi bi-person-check">
-                            Buat Akun Pelanggan Sekarang
-                        </x-button>
-                    </div>
-                </form>
-
-                <!-- Footer Link -->
-                <div class="text-center mt-3 pt-3 border-top small text-secondary">
-                    Sudah memiliki akun? 
-                    <a href="{{ route('login') }}" class="text-decoration-none fw-semibold" style="color: var(--color-mocha);">
-                        Masuk ke akun
-                    </a>
-                </div>
-            </x-card>
-        </div>
+            <footer class="auth-card-footer">Sudah memiliki akun? <a href="{{ route('login') }}">Masuk ke akun</a></footer>
+        </section>
     </div>
 </div>
 @endsection

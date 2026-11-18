@@ -13,6 +13,7 @@ class DashboardController extends Controller
     {
         $pendingPaymentsCount = Payment::where('verification_status', Payment::STATUS_PENDING)
             ->whereNotNull('proof_file_path')
+            ->whereHas('order', fn ($orders) => $orders->where('status', Order::STATUS_WAITING_PAYMENT))
             ->count();
 
         $pendingCancellationsCount = CancellationRequest::where('status', CancellationRequest::STATUS_PENDING)->count();

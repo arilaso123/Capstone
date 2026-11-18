@@ -13,6 +13,7 @@ use App\Models\OrderDetail;
 use App\Models\Payment;
 use App\Models\OrderStatusHistory;
 use App\Models\CancellationRequest;
+use LogicException;
 
 class DatabaseSeeder extends Seeder
 {
@@ -21,6 +22,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        if (app()->environment('production')) {
+            throw new LogicException('DatabaseSeeder berisi akun dan data demo. Seeder ini tidak boleh dijalankan di production.');
+        }
+
         // ==========================================
         // 1. USERS & CUSTOMERS (1 Owner, 2 Admin, Customers)
         // ==========================================
@@ -312,6 +317,14 @@ class DatabaseSeeder extends Seeder
             'image_path' => 'products/perfume_15.jpg',
             'is_active' => true,
         ]);
+
+        // Seeders remain repeatable and only seed explicitly known prices (60 ml).
+        Product::query()->with('variants')->each(function (Product $product): void {
+            $product->variants()->firstOrCreate(
+                ['size_ml' => $product->size_ml],
+                ['price' => $product->price, 'cost_price' => null],
+            );
+        });
 
 
         // ==========================================

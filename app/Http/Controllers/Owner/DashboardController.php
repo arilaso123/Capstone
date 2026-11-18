@@ -7,16 +7,17 @@ use App\Models\PoPeriod;
 use App\Models\Order;
 use App\Models\Customer;
 use App\Models\Product;
+use App\Models\Payment;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $activePo = PoPeriod::active()->first();
+        $activePo = PoPeriod::cachedActive();
 
         $totalOrdersCount = Order::count();
         $totalCustomersCount = Customer::count();
-        $totalRevenue = Order::where('status', '!=', Order::STATUS_CANCELLED)->sum('total_amount');
+        $totalRevenue = Payment::where('verification_status', Payment::STATUS_VALID)->sum('amount');
         $activeProductsCount = Product::active()->count();
 
         // Breakdown for the active PO period (or all if none)

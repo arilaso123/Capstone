@@ -9,8 +9,8 @@ class ProductDetailController extends Controller
 {
     public function show($id)
     {
-        $product = Product::findOrFail($id);
-        $activePo = PoPeriod::active()->first();
+        $product = Product::active()->with('variants')->findOrFail($id);
+        $activePo = PoPeriod::cachedActive();
 
         return view('pages.product-detail', compact('product', 'activePo'));
     }

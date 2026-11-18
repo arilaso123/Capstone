@@ -2,22 +2,25 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Actions\DecideCancellationAction;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\DecideCancellationRequest;
 use App\Models\CancellationRequest;
-use App\Models\Order;
-use App\Models\OrderStatusHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class CancellationController extends Controller
 {
     public function index(Request $request)
     {
+        $filters = $request->validate([
+            'status' => ['nullable', 'in:' . implode(',', [CancellationRequest::STATUS_PENDING, CancellationRequest::STATUS_APPROVED, CancellationRequest::STATUS_REJECTED])],
+        ]);
+
         $query = CancellationRequest::with(['order.customer', 'reviewer']);
 
-        if ($request->filled('status')) {
-            $query->where('status', $request->input('status'));
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
         }
 
         $cancellations = $query->latest()->paginate(10)->withQueryString();
@@ -27,53 +30,27 @@ class CancellationController extends Controller
 
     public function show($id)
     {
-        $cancellation = CancellationRequest::with(['order.customer.user', 'order.orderDetails'])->findOrFail($id);
+        $cancellation = CancellationRequest::with(['order.customer.user', 'order.orderDetails', 'order.payment'])->findOrFail($id);
 
         return view('admin.cancellations.show', compact('cancellation'));
     }
 
-    public function decide(Request $request, $id)
+    public function decide(DecideCancellationRequest $request, $id, DecideCancellationAction $decideCancellation)
     {
-        $cancellation = CancellationRequest::with('order')->findOrFail($id);
+        $validated = $request->validated();
+        $decision = $validated['status'];
+        $result = $decideCancellation->execute($id, $validated, $request->file('refund_proof'), Auth::id());
 
-        if ($cancellation->status !== CancellationRequest::STATUS_PENDING) {
-            return redirect()->route('admin.cancellations.show', $cancellation->id)
-                ->with('warning', 'Permohonan pembatalan ini sudah pernah diproses sebelumnya dengan putusan: ' . $cancellation->status . '.');
+        if (isset($result['upload_error'])) {
+            return back()->withInput()->with('error', $result['upload_error']);
         }
 
-        $request->validate([
-            'status' => ['required', 'in:Disetujui,Ditolak'],
-            'admin_notes' => ['nullable', 'string', 'max:500'],
-        ]);
-
-        $decision = $request->input('status');
-        $notes = $request->input('admin_notes');
-
-        DB::transaction(function () use ($cancellation, $decision, $notes) {
-            $cancellation->update([
-                'status' => $decision,
-                'admin_notes' => $notes,
-                'reviewed_by' => Auth::id(),
-                'reviewed_at' => now(),
-            ]);
-
-            if ($decision === CancellationRequest::STATUS_APPROVED) {
-                $order = $cancellation->order;
-                $prevStatus = $order->status;
-                $order->update(['status' => Order::STATUS_CANCELLED]);
-
-                OrderStatusHistory::create([
-                    'order_id' => $order->id,
-                    'previous_status' => $prevStatus,
-                    'new_status' => Order::STATUS_CANCELLED,
-                    'remarks' => 'Pesanan dibatalkan atas persetujuan permohonan pembatalan oleh Admin: ' . ($notes ?: 'Disetujui'),
-                    'changed_by' => Auth::id(),
-                ]);
-            }
-        });
+        if (isset($result['warning'])) {
+            return redirect()->route('admin.cancellations.show', $id)->with('warning', $result['warning']);
+        }
 
         return redirect()->route('admin.cancellations.index')
-            ->with('success', "Putusan permohonan pembatalan untuk pesanan #{$cancellation->order->order_number} berhasil disimpan ({$decision}).");
+            ->with('success', "Putusan permohonan pembatalan untuk pesanan #{$result['order_number']} berhasil disimpan ({$decision}).");
     }
 }
 

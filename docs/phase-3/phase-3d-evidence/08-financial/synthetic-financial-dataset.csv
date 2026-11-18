@@ -1,0 +1,9 @@
+Order Reference,Description,Product Name,Variant Size,Qty,Unit Price (Rp),Subtotal (Rp),Cost Price (Rp),Total Cost (Rp),Order Status,Payment Status,Refund (Rp)
+ORD-001,"Verified, In Progress (Processing)","Parfum Vanilla Oud",50ml,1,150000,150000,100000,100000,"Diproses","Valid",0
+ORD-002,"Verified, Shipped","Parfum Vanilla Oud",30ml,2,95000,190000,60000,120000,"Barang Dikirim","Valid",0
+ORD-003,"Verified, Completed","Parfum Vanilla Oud",100ml,1,250000,250000,170000,170000,"Selesai","Valid",0
+ORD-004,"Pending Verification, Waiting Payment","Parfum Vanilla Oud",50ml,1,150000,150000,100000,100000,"Menunggu Pembayaran","Menunggu Verifikasi",0
+ORD-005,"Unpaid, Waiting Payment","Parfum Vanilla Oud",30ml,1,95000,95000,60000,60000,"Menunggu Pembayaran","Menunggu Verifikasi",0
+ORD-006,"Rejected Payment, Waiting Payment","Parfum Vanilla Oud",50ml,1,150000,150000,100000,100000,"Menunggu Pembayaran","Ditolak",0
+ORD-007,"Verified then Cancelled with Full Refund","Parfum Vanilla Oud",50ml,1,150000,150000,100000,100000,"Dibatalkan","Valid",150000
+ORD-008,"Verified with Variant Price Updated Later","Parfum Vanilla Oud",50ml,1,150000,150000,100000,100000,"Pembayaran Diverifikasi","Valid",0

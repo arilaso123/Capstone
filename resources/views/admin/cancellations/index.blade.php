@@ -1,84 +1,51 @@
 @extends('layouts.admin')
 
-@section('title', 'Daftar Permohonan Pembatalan')
+@section('title', 'Permohonan Pembatalan')
 
 @section('content')
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
-    <div>
-        <h2 class="h4 fw-bold mb-1 font-heading">Permohonan Pembatalan Pesanan</h2>
-        <span class="text-muted small">Pemeriksaan dan persetujuan pengajuan pembatalan dari pelanggan (FR-14, FR-15).</span>
-    </div>
-</div>
+<div class="admin-cancellations-page">
+    <header class="admin-cancellations-header">
+        <div>
+            <p class="home-eyebrow">Tugas operasional</p>
+            <h1>Permohonan pembatalan</h1>
+            <p>Tinjau alasan pelanggan, status pembayaran, dan catatan refund sebelum menetapkan keputusan.</p>
+        </div>
+    </header>
 
-<div class="card card-uyuy p-4">
-    <div class="d-flex flex-wrap gap-2 mb-4">
-        <a href="{{ route('admin.cancellations.index') }}" class="btn btn-sm {{ !request('status') ? 'btn-dark' : 'btn-outline-secondary' }}">
-            Semua Permohonan
-        </a>
-        <a href="{{ route('admin.cancellations.index', ['status' => \App\Models\CancellationRequest::STATUS_PENDING]) }}"
-           class="btn btn-sm {{ request('status') === \App\Models\CancellationRequest::STATUS_PENDING ? 'btn-dark' : 'btn-outline-secondary' }}">
-            Menunggu Persetujuan
-        </a>
-        <a href="{{ route('admin.cancellations.index', ['status' => \App\Models\CancellationRequest::STATUS_APPROVED]) }}"
-           class="btn btn-sm {{ request('status') === \App\Models\CancellationRequest::STATUS_APPROVED ? 'btn-dark' : 'btn-outline-secondary' }}">
-            Disetujui
-        </a>
-        <a href="{{ route('admin.cancellations.index', ['status' => \App\Models\CancellationRequest::STATUS_REJECTED]) }}"
-           class="btn btn-sm {{ request('status') === \App\Models\CancellationRequest::STATUS_REJECTED ? 'btn-dark' : 'btn-outline-secondary' }}">
-            Ditolak
-        </a>
-    </div>
+    <nav class="admin-cancellation-filters" aria-label="Filter permohonan pembatalan">
+        <span>Status permohonan</span>
+        <a href="{{ route('admin.cancellations.index') }}" @class(['active' => !request('status')]) @if(!request('status')) aria-current="page" @endif>Semua</a>
+        <a href="{{ route('admin.cancellations.index', ['status' => \App\Models\CancellationRequest::STATUS_PENDING]) }}" @class(['active' => request('status') === \App\Models\CancellationRequest::STATUS_PENDING]) @if(request('status') === \App\Models\CancellationRequest::STATUS_PENDING) aria-current="page" @endif>Menunggu persetujuan</a>
+        <a href="{{ route('admin.cancellations.index', ['status' => \App\Models\CancellationRequest::STATUS_APPROVED]) }}" @class(['active' => request('status') === \App\Models\CancellationRequest::STATUS_APPROVED]) @if(request('status') === \App\Models\CancellationRequest::STATUS_APPROVED) aria-current="page" @endif>Disetujui</a>
+        <a href="{{ route('admin.cancellations.index', ['status' => \App\Models\CancellationRequest::STATUS_REJECTED]) }}" @class(['active' => request('status') === \App\Models\CancellationRequest::STATUS_REJECTED]) @if(request('status') === \App\Models\CancellationRequest::STATUS_REJECTED) aria-current="page" @endif>Ditolak</a>
+    </nav>
 
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-light small">
-                <tr>
-                    <th>No. Pesanan</th>
-                    <th>Nama Pelanggan</th>
-                    <th>Alasan Pengajuan</th>
-                    <th>Waktu Diajukan</th>
-                    <th>Status Permohonan</th>
-                    <th class="text-end">Aksi Putusan</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($cancellations as $cancellation)
-                    <tr>
-                        <td>
-                            <strong class="text-dark">{{ $cancellation->order?->order_number ?? '-' }}</strong>
-                            <div class="text-muted small">{{ $cancellation->order?->poPeriod?->name ?? '-' }}</div>
-                        </td>
-                        <td>{{ $cancellation->order?->customer?->full_name ?? $cancellation->order?->recipient_name }}</td>
-                        <td><span class="text-truncate d-inline-block" style="max-width: 280px;">{{ $cancellation->reason }}</span></td>
-                        <td>{{ $cancellation->created_at->format('d M Y, H:i') }} WIB</td>
-                        <td>
-                            <span class="badge {{ $cancellation->isApproved() ? 'bg-success' : ($cancellation->isRejected() ? 'bg-danger' : 'bg-warning text-dark') }}">
-                                {{ $cancellation->status }}
-                            </span>
-                        </td>
-                        <td class="text-end">
-                            <a href="{{ route('admin.cancellations.show', $cancellation->id) }}" class="btn btn-sm {{ $cancellation->isPending() ? 'btn-mocha' : 'btn-outline-secondary' }}">
-                                <i class="bi {{ $cancellation->isPending() ? 'bi-clipboard-check' : 'bi-eye' }} me-1"></i>
-                                {{ $cancellation->isPending() ? 'Proses Putusan' : 'Lihat Detail' }}
-                            </a>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="text-center py-5 text-muted">
-                            <i class="bi bi-inbox fs-2 d-block mb-2"></i>
-                            Tidak ada permohonan pembatalan yang ditemukan.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+    <section class="admin-cancellations-table-panel" aria-label="Daftar permohonan">
+        @if($cancellations->count())
+            <div class="table-responsive">
+                <table class="table admin-cancellations-table align-middle mb-0">
+                    <thead><tr><th scope="col">Pesanan</th><th scope="col">Pelanggan</th><th scope="col">Alasan</th><th scope="col">Waktu diajukan</th><th scope="col">Status</th><th scope="col"><span class="visually-hidden">Tindakan</span></th></tr></thead>
+                    <tbody>
+                        @foreach($cancellations as $cancellation)
+                            <tr>
+                                <td><strong>{{ $cancellation->order?->order_number ?? '—' }}</strong><small>{{ $cancellation->order?->poPeriod?->name ?? '—' }}</small></td>
+                                <td>{{ $cancellation->order?->customer?->full_name ?? $cancellation->order?->recipient_name ?? '—' }}</td>
+                                <td><span class="admin-cancellation-reason" title="{{ $cancellation->reason }}">{{ $cancellation->reason }}</span></td>
+                                <td>{{ $cancellation->created_at->copy()->timezone('Asia/Jakarta')->format('d M Y, H:i') }} WIB</td>
+                                <td><span class="admin-cancellation-status">{{ $cancellation->status }}</span></td>
+                                <td class="text-end"><a class="admin-cancellation-action" href="{{ route('admin.cancellations.show', $cancellation->id) }}">{{ $cancellation->isPending() ? 'Tinjau permohonan' : 'Lihat detail' }} <span aria-hidden="true">→</span></a></td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @else
+            <div class="admin-cancellations-empty"><p class="home-eyebrow">Tidak ada permohonan</p><h2>Daftar ini masih kosong</h2><p>Permohonan pembatalan akan ditampilkan di sini untuk ditinjau.</p></div>
+        @endif
+    </section>
 
     @if($cancellations->hasPages())
-        <div class="d-flex justify-content-center mt-4">
-            {{ $cancellations->links() }}
-        </div>
+        <nav class="admin-cancellations-pagination" aria-label="Navigasi halaman permohonan">{{ $cancellations->withQueryString()->links() }}</nav>
     @endif
 </div>
 @endsection

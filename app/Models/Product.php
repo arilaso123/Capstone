@@ -36,23 +36,52 @@ class Product extends Model
         return $this->hasMany(OrderDetail::class);
     }
 
+    public function variants(): HasMany
+    {
+        return $this->hasMany(ProductVariant::class)->orderBy('size_ml');
+    }
+
+    public function variantForSize(int $sizeMl): ?ProductVariant
+    {
+        if ($this->relationLoaded('variants')) {
+            return $this->getRelation('variants')->firstWhere('size_ml', $sizeMl);
+        }
+
+        return $this->variants()->where('size_ml', $sizeMl)->first();
+    }
+
+    public function availableSizes(): array
+    {
+        $sizes = $this->relationLoaded('variants')
+            ? $this->getRelation('variants')->pluck('size_ml')
+            : $this->variants()->pluck('size_ml');
+
+        return $sizes->map(fn ($size) => (int) $size)->all();
+    }
+
+    public function startingPrice(): ?float
+    {
+        $prices = $this->relationLoaded('variants')
+            ? $this->getRelation('variants')->pluck('price')
+            : $this->variants()->pluck('price');
+
+        return $prices->isEmpty() ? null : (float) $prices->min();
+    }
+
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
     }
 
-    /**
-     * Get price dynamically for size (35ml, 60ml, 100ml) based on official In Parfume tier.
-     */
     public function getPriceForSize(int $sizeMl): float
     {
-        if ($sizeMl === 35) {
-            return (float) ($this->price >= 110000 ? 85000 : ($this->price >= 90000 ? 65000 : 55000));
+        $variant = $this->variantForSize($sizeMl);
+
+        if (!$variant) {
+            throw new \InvalidArgumentException("Varian ukuran {$sizeMl} ml tidak tersedia untuk produk ini.");
         }
-        if ($sizeMl === 100) {
-            return (float) ($this->price >= 110000 ? 180000 : ($this->price >= 90000 ? 140000 : 120000));
-        }
-        return (float) $this->price;
+
+        return (float) $variant->price;
     }
 }
 

@@ -3,22 +3,24 @@
 @section('title', 'Manajemen Master Produk')
 
 @section('content')
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+<section class="owner-products-page" aria-labelledby="ownerProductsTitle">
+<header class="workspace-page-header">
     <div>
-        <h2 class="h4 fw-bold mb-1 font-heading">Katalog Produk Parfum (In Parfume)</h2>
-        <span class="text-muted small">Kelola master varian produk parfum, ukuran, penetapan harga, dan ketersediaan (FR-05).</span>
+        <p class="owner-recap-eyebrow">OWNER / MASTER PRODUK</p>
+        <h1 id="ownerProductsTitle">Katalog produk parfum</h1>
+        <p>Kelola master varian produk parfum, ukuran, penetapan harga, dan ketersediaan (FR-05).</p>
     </div>
     <div class="d-flex gap-2">
-        <a href="{{ route('owner.products.create') }}" class="btn btn-mocha btn-sm">
-            <i class="bi bi-plus-lg me-1"></i> Tambah Produk Baru
+        <a href="{{ route('owner.products.create') }}" class="btn btn-dark">
+            <i class="bi bi-plus-lg" aria-hidden="true"></i> Tambah Produk Baru
         </a>
     </div>
-</div>
+</header>
 
-<div class="card card-uyuy p-4">
+<div class="card card-uyuy owner-products-panel p-3 p-md-4">
     <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-light small">
+        <table class="table owner-products-table align-middle mb-0">
+            <thead>
                 <tr>
                     <th>Foto</th>
                     <th>Nama Varian Parfum</th>
@@ -40,33 +42,33 @@
                                         ? $product->image_path
                                         : asset('storage/' . $product->image_path);
                                 @endphp
-                                <img src="{{ $img }}" alt="{{ $product->name }}" class="rounded border" style="width: 48px; height: 48px; object-fit: cover;">
+                                <img src="{{ $img }}" alt="{{ $product->name }}" class="owner-product-thumb">
                             @else
-                                <div class="rounded border bg-light d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                                    <i class="bi bi-droplet text-muted"></i>
+                                <div class="owner-product-thumb owner-product-thumb-empty">
+                                    <i class="bi bi-droplet text-muted" aria-hidden="true"></i>
                                 </div>
                             @endif
                         </td>
                         <td>
-                            <strong class="text-dark">{{ $product->name }}</strong>
+                            <strong>{{ $product->name }}</strong>
                         </td>
                         <td>{{ $product->brand ?? 'In Parfume' }}</td>
-                        <td><span class="badge bg-light text-dark border">{{ $product->category ?? '-' }}</span></td>
-                        <td>{{ $product->size_ml }} ml</td>
-                        <td class="fw-bold">Rp {{ number_format($product->price, 0, ',', '.') }}</td>
+                        <td><span class="badge-uyuy badge-po-closed">{{ $product->category ?? '-' }}</span></td>
+                        <td>{{ $product->variants->pluck('size_ml')->implode(', ') ?: $product->size_ml }} ml</td>
+                        <td>Mulai Rp {{ number_format($product->startingPrice() ?? (float) $product->price, 0, ',', '.') }}</td>
                         <td>
                             @if($product->is_active)
-                                <span class="badge bg-success">Aktif di Katalog</span>
+                                <span class="badge-uyuy badge-po-open"><i class="bi bi-check-lg" aria-hidden="true"></i> Aktif</span>
                             @else
-                                <span class="badge bg-secondary">Nonaktif</span>
+                                <span class="badge-uyuy badge-po-closed"><i class="bi bi-pause-circle" aria-hidden="true"></i> Nonaktif</span>
                             @endif
                         </td>
                         <td class="text-end">
-                            <div class="btn-group btn-group-sm">
-                                <a href="{{ route('owner.products.edit', $product->id) }}" class="btn btn-outline-secondary">Edit</a>
+                            <div class="d-inline-flex flex-wrap justify-content-end gap-1">
+                                <a href="{{ route('owner.products.edit', $product->id) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
                                 <form action="{{ route('owner.products.toggle', $product->id) }}" method="POST" class="d-inline">
                                     @csrf
-                                    <button type="submit" class="btn {{ $product->is_active ? 'btn-outline-warning text-dark' : 'btn-outline-success' }}">
+                                    <button type="submit" class="btn btn-sm {{ $product->is_active ? 'btn-outline-secondary' : 'btn-dark' }}">
                                         {{ $product->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
                                     </button>
                                 </form>
@@ -76,7 +78,7 @@
                 @empty
                     <tr>
                         <td colspan="8" class="text-center py-5 text-muted">
-                            <i class="bi bi-box-seam fs-2 d-block mb-2"></i>
+                            <i class="bi bi-box-seam fs-2 d-block mb-2" aria-hidden="true"></i>
                             Belum ada produk parfum di katalog.
                         </td>
                     </tr>
@@ -91,4 +93,5 @@
         </div>
     @endif
 </div>
+</section>
 @endsection

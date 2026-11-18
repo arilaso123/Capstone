@@ -3,142 +3,147 @@
 @section('title', 'Verifikasi Bukti Pembayaran #' . ($payment->order?->order_number ?? ''))
 
 @section('content')
-<!-- Header Breadcrumbs -->
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom" style="border-color: rgba(216, 197, 174, 0.3) !important;">
-    <div>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-1 small">
-                <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}" class="text-decoration-none" style="color: var(--color-mocha);">Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="{{ route('admin.payments.index') }}" class="text-decoration-none" style="color: var(--color-mocha);">Pembayaran</a></li>
-                <li class="breadcrumb-item active text-secondary" aria-current="page">Verifikasi {{ $payment->order?->order_number ?? '' }}</li>
-            </ol>
-        </nav>
-        <h2 class="h3 fw-bold font-heading mb-0 text-dark" style="letter-spacing: -0.02em;">Layar Pemeriksaan Bukti Pembayaran</h2>
-    </div>
-    <a href="{{ route('admin.payments.index') }}" class="btn btn-outline-secondary btn-sm py-2 px-3">
-        <i class="bi bi-arrow-left me-1"></i> Kembali ke Antrean
-    </a>
-</div>
+<section class="admin-payment-review" aria-labelledby="paymentReviewTitle">
+    <nav class="owner-form-breadcrumb" aria-label="Breadcrumb">
+        <a href="{{ route('admin.dashboard') }}">Dashboard</a>
+        <span aria-hidden="true">/</span>
+        <a href="{{ route('admin.payments.index') }}">Pembayaran</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">{{ $payment->order?->order_number ?? 'Verifikasi' }}</span>
+    </nav>
 
-<div class="row g-4">
-    <!-- Left: Payment Proof Image Inspection -->
-    <div class="col-lg-7">
-        <x-card class="p-4 border-0 shadow">
-            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: rgba(216, 197, 174, 0.3) !important;">
-                <h5 class="fw-bold font-heading mb-0 text-dark">Berkas Bukti Transfer Pelanggan</h5>
-                <span class="badge rounded-pill px-3 py-1" style="background: rgba(139, 107, 80, 0.12); color: var(--color-mocha); font-size: 0.75rem;">
-                    <i class="bi bi-file-earmark-image me-1"></i> {{ basename($payment->proof_file_path ?? 'bukti.jpg') }}
-                </span>
-            </div>
+    <header class="admin-review-header">
+        <div>
+            <p class="owner-recap-eyebrow">ADMIN / PEMERIKSAAN PEMBAYARAN</p>
+            <h1 id="paymentReviewTitle">Verifikasi bukti pembayaran</h1>
+            <p>{{ $payment->order?->order_number ?? 'Pesanan tidak tersedia' }}</p>
+        </div>
+        <a href="{{ route('admin.payments.index') }}" class="btn btn-outline-secondary">Kembali ke antrean</a>
+    </header>
 
-            <div class="p-3 rounded-4 text-center overflow-hidden mb-3" style="background: #FAF8F5; border: 1.5px solid rgba(216, 197, 174, 0.45); min-height: 400px; display: flex; align-items: center; justify-content: center;">
-                @if($payment->proof_file_path)
-                    @php
-                        $imageSrc = str_starts_with($payment->proof_file_path, 'http')
-                            ? $payment->proof_file_path
-                            : asset('storage/' . $payment->proof_file_path);
-                    @endphp
-                    <a href="{{ $imageSrc }}" target="_blank" title="Klik untuk membuka ukuran penuh">
-                        <img src="{{ $imageSrc }}" alt="Bukti Transfer BCA" class="img-fluid rounded-3 shadow-sm" style="max-height: 480px; object-fit: contain;">
-                    </a>
+    <div class="admin-review-grid">
+        <div class="admin-review-proof-column">
+            <section class="admin-review-panel" aria-labelledby="proofTitle">
+                <header class="admin-review-panel-header">
+                    <div>
+                        <p class="owner-recap-eyebrow">LAMPIRAN</p>
+                        <h2 id="proofTitle">Bukti dari pelanggan</h2>
+                    </div>
+                    <span class="admin-review-file-name">{{ basename($payment->proof_file_path ?? 'bukti pembayaran') }}</span>
+                </header>
+
+                <div class="admin-review-proof-frame">
+                    @if($payment->proof_file_path && !str_starts_with($payment->proof_file_path, 'http'))
+                        <a href="{{ route('payments.proof', $payment) }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary">
+                            <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Buka bukti secara aman
+                        </a>
+                    @elseif($payment->proof_file_path)
+                        <div class="admin-review-proof-message" role="status">
+                            <i class="bi bi-shield-exclamation" aria-hidden="true"></i>
+                            <strong>Path bukti berasal dari URL eksternal.</strong>
+                            <span>Minta pelanggan mengunggah ulang bukti melalui halaman pesanan sebelum menetapkan keputusan.</span>
+                        </div>
+                    @else
+                        <div class="admin-review-proof-message" role="status">
+                            <i class="bi bi-image" aria-hidden="true"></i>
+                            <strong>Bukti pembayaran belum tersedia.</strong>
+                        </div>
+                    @endif
+                </div>
+
+                <footer class="admin-review-proof-meta">
+                    <span>Diunggah {{ $payment->uploaded_at?->copy()->timezone('Asia/Jakarta')->format('d M Y, H:i') ?? '—' }} WIB</span>
+                    <span>Akses terbatas</span>
+                </footer>
+            </section>
+
+            @if($payment->attempts->isNotEmpty())
+                <section class="admin-review-panel admin-review-history">
+                    <details>
+                        <summary>Riwayat unggahan ({{ $payment->attempts->count() }})</summary>
+                        <div class="admin-review-attempts">
+                            @foreach($payment->attempts->sortByDesc('attempt_number') as $attempt)
+                                <article class="admin-review-attempt">
+                                    <header>
+                                        <strong>Unggahan #{{ $attempt->attempt_number }}</strong>
+                                        <span class="admin-payment-status">{{ $attempt->verification_status }}</span>
+                                    </header>
+                                    <p>{{ $attempt->uploaded_at?->copy()->timezone('Asia/Jakarta')->format('d M Y, H:i') ?? '—' }} WIB · Rp {{ number_format((float) $attempt->amount, 0, ',', '.') }}</p>
+                                    @if($attempt->admin_notes)
+                                        <p>Catatan Admin: {{ $attempt->admin_notes }}</p>
+                                    @endif
+                                    @if($attempt->proof_file_path && !preg_match('/^https?:\/\//i', $attempt->proof_file_path))
+                                        <a href="{{ route('payments.attempt-proof', $attempt) }}" target="_blank" rel="noopener noreferrer">Buka berkas unggahan #{{ $attempt->attempt_number }}</a>
+                                    @elseif($attempt->proof_file_path)
+                                        <span class="admin-review-history-note">Path bukti lama bersumber eksternal.</span>
+                                    @endif
+                                </article>
+                            @endforeach
+                        </div>
+                    </details>
+                </section>
+            @endif
+        </div>
+
+        <div class="admin-review-decision-column">
+            <section class="admin-review-panel" aria-labelledby="paymentMatchTitle">
+                <header class="admin-review-panel-header">
+                    <div>
+                        <p class="owner-recap-eyebrow">DATA PESANAN</p>
+                        <h2 id="paymentMatchTitle">Cocokkan pembayaran</h2>
+                    </div>
+                </header>
+                <dl class="admin-review-data">
+                    <div><dt>Nomor pesanan</dt><dd>{{ $payment->order?->order_number ?? '—' }}</dd></div>
+                    <div><dt>Nama pemesan</dt><dd>{{ $payment->order?->customer?->full_name ?? $payment->order?->recipient_name ?? '—' }}</dd></div>
+                    <div><dt>Total tagihan</dt><dd>Rp {{ number_format($payment->order?->total_amount ?? 0, 0, ',', '.') }}</dd></div>
+                    <div><dt>Nominal pembayaran</dt><dd>Rp {{ number_format($payment->amount, 0, ',', '.') }}</dd></div>
+                </dl>
+                <p class="admin-review-instruction">Cocokkan nominal, waktu transaksi, dan informasi pengirim pada bukti dengan data pembayaran sebelum menetapkan hasil.</p>
+            </section>
+
+            <section class="admin-review-panel" aria-labelledby="decisionTitle">
+                <header class="admin-review-panel-header">
+                    <div>
+                        <p class="owner-recap-eyebrow">KEPUTUSAN</p>
+                        <h2 id="decisionTitle">Catat hasil verifikasi</h2>
+                    </div>
+                </header>
+
+                @if($payment->isPending() && $payment->order?->status === \App\Models\Order::STATUS_WAITING_PAYMENT && $payment->proof_file_path && !str_starts_with($payment->proof_file_path, 'http'))
+                    <form action="{{ route('admin.payments.verify.post', $payment->id) }}" method="POST" class="admin-review-form">
+                        @csrf
+                        <fieldset class="admin-review-status-fieldset" @if($errors->has('verification_status')) aria-describedby="verification-status-error" @endif>
+                            <legend>Status verifikasi <span aria-hidden="true">*</span></legend>
+                            <div class="admin-review-status-options">
+                                <label class="admin-review-status-option">
+                                    <input type="radio" name="verification_status" id="statusValid" value="Valid" {{ old('verification_status', $payment->verification_status) === 'Valid' ? 'checked' : '' }} required aria-invalid="{{ $errors->has('verification_status') ? 'true' : 'false' }}" @if($errors->has('verification_status')) aria-describedby="verification-status-error" @endif>
+                                    <span>Diterima</span>
+                                </label>
+                                <label class="admin-review-status-option">
+                                    <input type="radio" name="verification_status" id="statusReject" value="Ditolak" {{ old('verification_status', $payment->verification_status) === 'Ditolak' ? 'checked' : '' }} aria-invalid="{{ $errors->has('verification_status') ? 'true' : 'false' }}" @if($errors->has('verification_status')) aria-describedby="verification-status-error" @endif>
+                                    <span>Ditolak</span>
+                                </label>
+                            </div>
+                            @error('verification_status')<p class="admin-review-error" id="verification-status-error" role="alert">{{ $message }}</p>@enderror
+                        </fieldset>
+
+                        <div class="admin-review-notes-field">
+                            <label for="admin_notes">Catatan Admin</label>
+                            <textarea class="form-control @error('admin_notes') is-invalid @enderror" id="admin_notes" name="admin_notes" rows="4" maxlength="1000" placeholder="Catat hasil pencocokan atau alasan penolakan." aria-invalid="{{ $errors->has('admin_notes') ? 'true' : 'false' }}" @if($errors->has('admin_notes')) aria-describedby="admin-notes-error" @endif>{{ old('admin_notes', $payment->admin_notes) }}</textarea>
+                            <span>Alasan wajib dicatat jika bukti ditolak.</span>
+                            @error('admin_notes')<p class="admin-review-error" id="admin-notes-error" role="alert">{{ $message }}</p>@enderror
+                        </div>
+
+                        <button type="submit" class="btn btn-dark admin-review-submit">Simpan hasil verifikasi</button>
+                    </form>
                 @else
-                    <div class="py-5 text-muted">
-                        <i class="bi bi-image fs-1 d-block mb-2" style="color: var(--color-mocha);"></i>
-                        Tidak ada berkas bukti yang diunggah.
+                    <div class="admin-review-unavailable" role="status">
+                        Keputusan tidak tersedia. Pembayaran harus menunggu verifikasi, memiliki bukti lokal yang dapat diakses, dan pesanannya masih menunggu pembayaran.
                     </div>
                 @endif
-            </div>
-
-            <div class="d-flex flex-wrap justify-content-between align-items-center small text-secondary">
-                <span>Waktu Unggah: <strong>{{ $payment->uploaded_at ? $payment->uploaded_at->format('d F Y, H:i') : '-' }} WIB</strong></span>
-                <span class="badge rounded-pill" style="background: rgba(45,36,30,0.06); color: var(--color-charcoal); font-size: 0.75rem;">
-                    <i class="bi bi-shield-check me-1"></i> Kebijakan Retensi Aktif (&le; 30 hari)
-                </span>
-            </div>
-        </x-card>
+            </section>
+        </div>
     </div>
-
-    <!-- Right: Verification Form & Data Match -->
-    <div class="col-lg-5">
-        <!-- Order & Amount Comparison Bento -->
-        <x-card class="p-4 mb-4 border-0 shadow">
-            <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom" style="border-color: rgba(216, 197, 174, 0.3) !important;">
-                <i class="bi bi-clipboard-data fs-5" style="color: var(--color-mocha);"></i>
-                <h6 class="fw-bold font-heading mb-0 text-dark">Pencocokan Data Mutasi BCA</h6>
-            </div>
-
-            <div class="p-3 rounded-4 mb-3 small" style="background: #FAF8F5; border: 1.5px solid rgba(216, 197, 174, 0.45);">
-                <div class="d-flex justify-content-between mb-2">
-                    <span class="text-secondary">Nomor Faktur:</span>
-                    <strong class="text-dark font-heading">{{ $payment->order?->order_number ?? '-' }}</strong>
-                </div>
-                <div class="d-flex justify-content-between mb-2">
-                    <span class="text-secondary">Nama Pemesan:</span>
-                    <strong class="text-dark">{{ $payment->order?->customer?->full_name ?? $payment->order?->recipient_name }}</strong>
-                </div>
-                <div class="d-flex justify-content-between mb-2">
-                    <span class="text-secondary">Total Tagihan Sistem:</span>
-                    <strong class="text-dark font-heading fs-6">Rp {{ number_format($payment->order?->total_amount ?? 0, 0, ',', '.') }}</strong>
-                </div>
-                <div class="d-flex justify-content-between pt-2 border-top" style="border-color: rgba(216, 197, 174, 0.3) !important;">
-                    <span class="text-secondary">Nominal Dilaporkan:</span>
-                    <strong class="text-success font-heading fs-5">Rp {{ number_format($payment->amount, 0, ',', '.') }}</strong>
-                </div>
-            </div>
-
-            <div class="small text-secondary" style="font-size: 0.78rem; line-height: 1.5;">
-                <i class="bi bi-info-circle me-1" style="color: var(--color-mocha);"></i> Pastikan nama pengirim dan jam transaksi pada gambar sesuai dengan mutasi internet banking BCA Merchant Anda.
-            </div>
-        </x-card>
-
-        <!-- Verification Action Form -->
-        <x-card class="p-4 border-0 shadow">
-            <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom" style="border-color: rgba(216, 197, 174, 0.3) !important;">
-                <i class="bi bi-check2-square fs-5" style="color: var(--color-mocha);"></i>
-                <h6 class="fw-bold font-heading mb-0 text-dark">Catat Keputusan Verifikasi</h6>
-            </div>
-
-            <form action="{{ route('admin.payments.verify.post', $payment->id) }}" method="POST">
-                @csrf
-
-                <!-- Decision Radios -->
-                <div class="mb-3">
-                    <label class="form-label small fw-semibold text-secondary mb-2">Status Penetapan <span class="text-danger">*</span></label>
-                    <div class="d-flex gap-2">
-                        <div class="flex-fill">
-                            <input class="btn-check" type="radio" name="verification_status" id="statusValid" value="Valid"
-                                {{ old('verification_status', $payment->verification_status) === 'Valid' ? 'checked' : '' }} autocomplete="off">
-                            <label class="btn btn-outline-success w-100 p-2 rounded-3 text-center fw-bold small" for="statusValid">
-                                <i class="bi bi-check-circle me-1"></i> Valid (Diterima)
-                            </label>
-                        </div>
-                        <div class="flex-fill">
-                            <input class="btn-check" type="radio" name="verification_status" id="statusReject" value="Ditolak"
-                                {{ old('verification_status', $payment->verification_status) === 'Ditolak' ? 'checked' : '' }} autocomplete="off">
-                            <label class="btn btn-outline-danger w-100 p-2 rounded-3 text-center fw-bold small" for="statusReject">
-                                <i class="bi bi-x-circle me-1"></i> Tolak Bukti
-                            </label>
-                        </div>
-                    </div>
-                    @error('verification_status')
-                        <div class="text-danger small mt-1 ps-1" style="font-size: 0.82rem;">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <!-- Admin Notes -->
-                <div class="mb-4">
-                    <label for="admin_notes" class="form-label small fw-semibold text-secondary mb-1">Catatan Operasional Admin</label>
-                    <div class="input-group-uyuy p-1">
-                        <textarea class="form-control border-0 bg-transparent shadow-none" id="admin_notes" name="admin_notes" rows="3" placeholder="Contoh: Mutasi BCA masuk lunas sesuai nominal tagihan.">{{ old('admin_notes', $payment->admin_notes) }}</textarea>
-                    </div>
-                    <div class="form-text small mt-1">Wajib diisi jika menolak bukti transfer (alasan penolakan).</div>
-                </div>
-
-                <x-button type="submit" variant="mocha" class="w-100 py-3 shadow-sm d-flex align-items-center justify-content-center gap-2" icon="bi bi-check2">
-                    Simpan Hasil Verifikasi
-                </x-button>
-            </form>
-        </x-card>
-    </div>
-</div>
+</section>
 @endsection

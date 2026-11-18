@@ -1,176 +1,160 @@
 @extends('layouts.admin')
 
-@section('title', 'Dashboard Operasional Admin')
+@section('title', 'Ringkasan Operasional Admin')
 
 @section('content')
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom" style="border-color: rgba(216, 197, 174, 0.3) !important;">
-    <div>
-        <h2 class="h3 fw-bold font-heading mb-1 text-dark" style="letter-spacing: -0.02em;">Dashboard Operasional Admin</h2>
-        <span class="text-secondary small">Kelola pemeriksaan bukti transfer BCA, pergerakan tahapan pesanan, dan peninjauan pembatalan pelanggan.</span>
-    </div>
-    <div class="d-flex align-items-center gap-2 mt-2 mt-sm-0">
-        <span class="badge rounded-pill px-3 py-2" style="background: rgba(139, 107, 80, 0.12); color: var(--color-mocha); font-size: 0.78rem;">
-            <i class="bi bi-clock me-1"></i> Jam Operasional: 09.00 - 19.00 WIB
-        </span>
-    </div>
-</div>
+<section class="admin-dashboard-page" aria-labelledby="adminDashboardTitle">
+    <nav class="workspace-breadcrumb" aria-label="Breadcrumb">
+        <span>Admin</span>
+        <span aria-hidden="true">/</span>
+        <span>Ringkasan Operasional</span>
+    </nav>
 
-<!-- Admin Stat Bento Grid -->
-<div class="row g-4 mb-4">
-    <!-- Pending Payments -->
-    <div class="col-sm-6 col-xl-3">
-        <a href="{{ route('admin.payments.index') }}" class="text-decoration-none">
-            <x-card interactive class="p-4 border-0 shadow h-100">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="small fw-semibold text-secondary" style="font-size: 0.8rem;">Verifikasi Pembayaran</span>
-                    <div class="p-2 rounded-3" style="background: rgba(245, 158, 11, 0.12); color: #D97706;">
-                        <i class="bi bi-credit-card fs-5"></i>
-                    </div>
-                </div>
-                <h3 class="display-6 fw-bold font-heading text-dark mb-0">{{ $pendingPaymentsCount }}</h3>
-                <span class="small text-danger" style="font-size: 0.75rem;">Perlu ditinjau segera</span>
-            </x-card>
-        </a>
-    </div>
-
-    <!-- Pending Cancellations -->
-    <div class="col-sm-6 col-xl-3">
-        <a href="{{ route('admin.cancellations.index') }}" class="text-decoration-none">
-            <x-card interactive class="p-4 border-0 shadow h-100">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="small fw-semibold text-secondary" style="font-size: 0.8rem;">Permohonan Batal</span>
-                    <div class="p-2 rounded-3" style="background: rgba(239, 68, 68, 0.12); color: #DC2626;">
-                        <i class="bi bi-x-octagon fs-5"></i>
-                    </div>
-                </div>
-                <h3 class="display-6 fw-bold font-heading text-dark mb-0">{{ $pendingCancellationsCount }}</h3>
-                <span class="small text-muted" style="font-size: 0.75rem;">Menunggu persetujuan</span>
-            </x-card>
-        </a>
-    </div>
-
-    <!-- Orders to Process -->
-    <div class="col-sm-6 col-xl-3">
-        <a href="{{ route('admin.orders.index', ['status' => \App\Models\Order::STATUS_PAYMENT_VERIFIED]) }}" class="text-decoration-none">
-            <x-card interactive class="p-4 border-0 shadow h-100">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="small fw-semibold text-secondary" style="font-size: 0.8rem;">Perlu Diproses</span>
-                    <div class="p-2 rounded-3" style="background: rgba(147, 51, 234, 0.12); color: #7C3AED;">
-                        <i class="bi bi-box-seam fs-5"></i>
-                    </div>
-                </div>
-                <h3 class="display-6 fw-bold font-heading text-dark mb-0">{{ $ordersToProcessCount }}</h3>
-                <span class="small text-muted" style="font-size: 0.75rem;">Belanja / Dikemas</span>
-            </x-card>
-        </a>
-    </div>
-
-    <!-- Orders Shipped -->
-    <div class="col-sm-6 col-xl-3">
-        <a href="{{ route('admin.orders.index', ['status' => \App\Models\Order::STATUS_SHIPPED]) }}" class="text-decoration-none">
-            <x-card interactive class="p-4 border-0 shadow h-100">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="small fw-semibold text-secondary" style="font-size: 0.8rem;">Sedang Dikirim</span>
-                    <div class="p-2 rounded-3" style="background: rgba(20, 184, 166, 0.12); color: #0D9488;">
-                        <i class="bi bi-truck fs-5"></i>
-                    </div>
-                </div>
-                <h3 class="display-6 fw-bold font-heading text-dark mb-0">{{ $ordersShippedCount }}</h3>
-                <span class="small text-muted" style="font-size: 0.75rem;">Dalam perjalanan ekspedisi</span>
-            </x-card>
-        </a>
-    </div>
-</div>
-
-<!-- Quick Action Alert (If Payments Pending) -->
-@if($pendingPaymentsCount > 0)
-    <div class="alert p-3 mb-4 rounded-4 d-flex align-items-center justify-content-between shadow-sm border-0" style="background: rgba(244, 236, 227, 0.8); border-left: 4px solid var(--color-mocha) !important;">
-        <div class="d-flex align-items-center gap-3">
-            <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px; background: #FFFFFF; color: var(--color-mocha); box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
-                <i class="bi bi-shield-check fs-5"></i>
-            </div>
-            <div>
-                <strong class="text-dark">Tugas Pemeriksaan Pembayaran Manual BCA Merchant</strong>
-                <div class="small text-secondary">Terdapat <strong>{{ $pendingPaymentsCount }}</strong> bukti transfer yang menunggu pencocokan mutasi bank dan konfirmasi verifikasi.</div>
-            </div>
-        </div>
-        <a href="{{ route('admin.payments.index') }}" class="btn btn-sm btn-mocha px-3 py-2 shadow-sm">
-            Buka Pemeriksaan &rarr;
-        </a>
-    </div>
-@endif
-
-<!-- Recent Orders Table -->
-<x-card class="p-4 p-md-5 border-0 shadow">
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom" style="border-color: rgba(216, 197, 174, 0.3) !important;">
+    <header class="admin-dashboard-header">
         <div>
-            <h5 class="fw-bold font-heading mb-1 text-dark">Pesanan Masuk Terbaru</h5>
-            <span class="small text-secondary">Daftar transaksi pelanggan terkini yang memerlukan tindakan operasional.</span>
+            <p class="owner-recap-eyebrow">ADMIN / OPERASIONAL</p>
+            <h1 id="adminDashboardTitle">Ringkasan operasional</h1>
+            <p class="admin-dashboard-header-subtitle">Tugas verifikasi pembayaran, pesanan yang perlu diproses, dan permohonan pembatalan.</p>
         </div>
-        <a href="{{ route('admin.orders.index') }}" class="btn btn-sm btn-outline-mocha px-3 py-2 mt-2 mt-sm-0">
-            Lihat Seluruh Pesanan <i class="bi bi-arrow-right ms-1"></i>
+        <span class="admin-dashboard-hours"><i class="bi bi-clock" aria-hidden="true"></i> Jam verifikasi: Selasa–Minggu, 09.00–19.00 WIB</span>
+    </header>
+
+    <div class="admin-dashboard-metrics" aria-label="Tugas operasional saat ini">
+        <a href="{{ route('admin.payments.index') }}" class="admin-dashboard-metric {{ $pendingPaymentsCount > 0 ? 'is-priority' : '' }}">
+            <div class="admin-metric-top">
+                <span class="admin-metric-label">Menunggu verifikasi pembayaran</span>
+                <span class="admin-metric-icon" aria-hidden="true"><i class="bi bi-credit-card"></i></span>
+            </div>
+            <div class="admin-metric-value-row">
+                <strong>{{ number_format($pendingPaymentsCount, 0, ',', '.') }}</strong>
+                @if($pendingPaymentsCount > 0)
+                    <span class="admin-metric-pill">Prioritas</span>
+                @endif
+            </div>
+            <span class="admin-dashboard-metric-action">Buka antrean <span aria-hidden="true">→</span></span>
+        </a>
+        <a href="{{ route('admin.cancellations.index') }}" class="admin-dashboard-metric {{ $pendingCancellationsCount > 0 ? 'is-priority' : '' }}">
+            <div class="admin-metric-top">
+                <span class="admin-metric-label">Permohonan pembatalan</span>
+                <span class="admin-metric-icon" aria-hidden="true"><i class="bi bi-x-circle"></i></span>
+            </div>
+            <div class="admin-metric-value-row">
+                <strong>{{ number_format($pendingCancellationsCount, 0, ',', '.') }}</strong>
+                @if($pendingCancellationsCount > 0)
+                    <span class="admin-metric-pill">Prioritas</span>
+                @endif
+            </div>
+            <span class="admin-dashboard-metric-action">Tinjau permohonan <span aria-hidden="true">→</span></span>
+        </a>
+        <a href="{{ route('admin.orders.index', ['status' => \App\Models\Order::STATUS_PAYMENT_VERIFIED]) }}" class="admin-dashboard-metric {{ $ordersToProcessCount > 0 ? 'is-priority' : '' }}">
+            <div class="admin-metric-top">
+                <span class="admin-metric-label">Pesanan perlu diproses</span>
+                <span class="admin-metric-icon" aria-hidden="true"><i class="bi bi-box-seam"></i></span>
+            </div>
+            <div class="admin-metric-value-row">
+                <strong>{{ number_format($ordersToProcessCount, 0, ',', '.') }}</strong>
+                @if($ordersToProcessCount > 0)
+                    <span class="admin-metric-pill">Prioritas</span>
+                @endif
+            </div>
+            <span class="admin-dashboard-metric-action">Lihat pesanan <span aria-hidden="true">→</span></span>
+        </a>
+        <a href="{{ route('admin.orders.index', ['status' => \App\Models\Order::STATUS_SHIPPED]) }}" class="admin-dashboard-metric">
+            <div class="admin-metric-top">
+                <span class="admin-metric-label">Pesanan sedang dikirim</span>
+                <span class="admin-metric-icon" aria-hidden="true"><i class="bi bi-truck"></i></span>
+            </div>
+            <div class="admin-metric-value-row">
+                <strong>{{ number_format($ordersShippedCount, 0, ',', '.') }}</strong>
+            </div>
+            <span class="admin-dashboard-metric-action">Pantau pengiriman <span aria-hidden="true">→</span></span>
         </a>
     </div>
 
-    <div class="table-responsive">
-        <table class="table align-middle mb-0">
-            <thead class="small" style="background: #FAF8F5; color: var(--color-charcoal);">
-                <tr>
-                    <th class="border-0 rounded-start-3 py-3">No. Faktur</th>
-                    <th class="border-0 py-3">Nama Pelanggan</th>
-                    <th class="border-0 py-3">No. WhatsApp</th>
-                    <th class="border-0 py-3">Total Tagihan</th>
-                    <th class="border-0 py-3">Status Pesanan</th>
-                    <th class="border-0 py-3">Verifikasi Bayar</th>
-                    <th class="border-0 rounded-end-3 py-3 text-end">Aksi Admin</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($recentOrders as $order)
-                    <tr style="border-bottom: 1px solid rgba(216, 197, 174, 0.25);">
-                        <td class="py-3">
-                            <strong class="text-dark font-heading">{{ $order->order_number }}</strong>
-                            <div class="text-muted small" style="font-size: 0.72rem;">{{ $order->created_at->format('d M Y, H:i') }}</div>
-                        </td>
-                        <td class="py-3 fw-semibold text-dark">{{ $order->customer?->full_name ?? $order->recipient_name }}</td>
-                        <td class="py-3 small text-secondary">{{ $order->recipient_phone }}</td>
-                        <td class="py-3 fw-bold font-heading text-dark">
-                            Rp {{ number_format($order->total_amount, 0, ',', '.') }}
-                        </td>
-                        <td class="py-3"><x-status-badge :status="$order->status" /></td>
-                        <td class="py-3">
-                            @if($order->payment && $order->payment->proof_file_path)
-                                <span class="badge rounded-pill px-3 py-1 {{ $order->payment->isValid() ? 'bg-success' : ($order->payment->isRejected() ? 'bg-danger' : 'bg-primary') }}">
-                                    {{ $order->payment->verification_status }}
-                                </span>
-                            @else
-                                <span class="badge rounded-pill px-3 py-1" style="background: rgba(245, 158, 11, 0.15); color: #B45309;">
-                                    <i class="bi bi-clock me-1"></i> Menunggu Bukti
-                                </span>
-                            @endif
-                        </td>
-                        <td class="py-3 text-end">
-                            <div class="d-inline-flex gap-1">
-                                <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-sm btn-outline-secondary px-2 py-1">
-                                    Detail
-                                </a>
-                                @if($order->payment && $order->payment->proof_file_path && $order->payment->isPending())
-                                    <a href="{{ route('admin.payments.verify', $order->payment->id) }}" class="btn btn-sm btn-mocha px-2 py-1 shadow-sm">
-                                        Periksa Bukti
-                                    </a>
-                                @endif
-                            </div>
-                        </td>
-                    </tr>
-                @empty
+    @if($pendingPaymentsCount > 0)
+        <aside class="admin-dashboard-priority" aria-label="Pekerjaan prioritas">
+            <div class="admin-dashboard-priority-body">
+                <span class="admin-priority-icon" aria-hidden="true"><i class="bi bi-exclamation-diamond"></i></span>
+                <div>
+                    <p class="owner-recap-eyebrow">TINDAKAN DIPERLUKAN</p>
+                    <h2>{{ number_format($pendingPaymentsCount, 0, ',', '.') }} bukti pembayaran menunggu pemeriksaan</h2>
+                    <p>Periksa informasi transfer dan lampiran bukti sebelum menetapkan hasil verifikasi.</p>
+                </div>
+            </div>
+            <a href="{{ route('admin.payments.index') }}" class="btn btn-dark">Buka verifikasi <span aria-hidden="true">→</span></a>
+        </aside>
+    @endif
+
+    <section class="admin-dashboard-orders" aria-labelledby="recentOrdersTitle">
+        <header class="admin-dashboard-orders-header">
+            <div>
+                <p class="owner-recap-eyebrow">AKTIVITAS TERBARU</p>
+                <h2 id="recentOrdersTitle">Pesanan terbaru</h2>
+                <p>Menampilkan hingga lima pesanan yang paling baru dibuat.</p>
+            </div>
+            <a href="{{ route('admin.orders.index') }}" class="btn btn-outline-secondary">Semua pesanan <span aria-hidden="true">→</span></a>
+        </header>
+
+        <div class="table-responsive admin-dashboard-table-wrap">
+            <table class="table admin-dashboard-table align-middle mb-0">
+                <caption class="visually-hidden">Pesanan terbaru beserta pelanggan, nilai transaksi, status, dan tindakan</caption>
+                <thead>
                     <tr>
-                        <td colspan="7" class="text-center py-5 text-muted">
-                            Belum ada pesanan terbaru dalam sistem.
-                        </td>
+                        <th scope="col">Nomor pesanan</th>
+                        <th scope="col">Pelanggan</th>
+                        <th scope="col">Kontak penerima</th>
+                        <th scope="col" class="text-end">Total</th>
+                        <th scope="col">Status pesanan</th>
+                        <th scope="col">Bukti pembayaran</th>
+                        <th scope="col" class="text-end">Tindakan</th>
                     </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-</x-card>
+                </thead>
+                <tbody>
+                    @forelse($recentOrders as $order)
+                        @php
+                            $proofStatus = $order->payment?->proof_file_path ? $order->payment->verification_status : null;
+                            $proofClass = match($proofStatus) {
+                                \App\Models\Payment::STATUS_VALID => 'is-valid',
+                                \App\Models\Payment::STATUS_PENDING => 'is-pending',
+                                \App\Models\Payment::STATUS_REJECTED => 'is-rejected',
+                                default => 'is-empty',
+                            };
+                        @endphp
+                        <tr>
+                            <td>
+                                <a href="{{ route('admin.orders.show', $order->id) }}" class="admin-dashboard-order-number" title="{{ $order->order_number }}">{{ $order->order_number }}</a>
+                                <span class="admin-dashboard-order-date">{{ $order->created_at->copy()->timezone('Asia/Jakarta')->format('d M Y, H:i') }} WIB</span>
+                            </td>
+                            <td>{{ $order->customer?->full_name ?? $order->recipient_name }}</td>
+                            <td class="admin-table-phone">{{ $order->recipient_phone }}</td>
+                            <td class="text-end admin-table-amount">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</td>
+                            <td><x-status-badge :status="$order->status" /></td>
+                            <td>
+                                <span class="admin-payment-status {{ $proofClass }}">{{ $proofStatus ?? 'Bukti belum diunggah' }}</span>
+                            </td>
+                            <td class="text-end">
+                                <div class="admin-dashboard-row-actions">
+                                    <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-sm btn-outline-secondary">Detail</a>
+                                    @if($order->payment && $order->payment->proof_file_path && $order->payment->isPending())
+                                        <a href="{{ route('admin.payments.verify', $order->payment->id) }}" class="btn btn-sm btn-dark">Periksa bukti</a>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7">
+                                <div class="admin-dashboard-empty">
+                                    <i class="bi bi-inbox" aria-hidden="true"></i>
+                                    <strong>Belum ada pesanan.</strong>
+                                    <span>Pesanan terbaru akan tampil di sini.</span>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </section>
+</section>
 @endsection

@@ -1,86 +1,96 @@
 @extends('layouts.owner')
 
-@section('title', 'Database Pelanggan')
+@section('title', 'Data Pelanggan')
 
 @section('content')
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
-    <div>
-        <h2 class="h4 fw-bold mb-1 font-heading">Data Pelanggan Pre-Order</h2>
-        <span class="text-muted small">Daftar pelanggan terdaftar pada layanan pre-order parfum Uyuy Jastip (~200 pelanggan).</span>
-    </div>
-</div>
-
-<!-- Search Bar -->
-<div class="card card-uyuy p-3 mb-4">
-    <form action="{{ route('owner.customers.index') }}" method="GET">
-        <div class="row g-2">
-            <div class="col-md-10">
-                <div class="input-group">
-                    <span class="input-group-text bg-white text-muted border-end-0"><i class="bi bi-search"></i></span>
-                    <input type="text" name="search" class="form-control border-start-0" placeholder="Cari nama pelanggan, nomor WhatsApp, email, atau kota..." value="{{ request('search') }}">
-                </div>
-            </div>
-            <div class="col-md-2 d-flex gap-1">
-                <button type="submit" class="btn btn-mocha w-100">
-                    <i class="bi bi-search me-1"></i> Cari
-                </button>
-                @if(request('search'))
-                    <a href="{{ route('owner.customers.index') }}" class="btn btn-outline-secondary" title="Reset">
-                        <i class="bi bi-x-lg"></i>
-                    </a>
-                @endif
-            </div>
+<section class="owner-customer-page" aria-labelledby="ownerCustomerTitle">
+    <header class="owner-customer-header">
+        <div>
+            <p class="owner-recap-eyebrow">OWNER / PELANGGAN</p>
+            <h1 class="owner-customer-title" id="ownerCustomerTitle">Data pelanggan</h1>
+            <p class="owner-customer-description">Informasi akun, kontak, dan riwayat jumlah pesanan pelanggan.</p>
         </div>
-    </form>
-</div>
+        <p class="owner-customer-total"><strong>{{ number_format($customers->total(), 0, ',', '.') }}</strong> {{ request('search') ? 'hasil pencarian' : 'pelanggan terdaftar' }}</p>
+    </header>
 
-<div class="card card-uyuy p-4">
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-light small">
-                <tr>
-                    <th>Nama Pelanggan</th>
-                    <th>Nomor WhatsApp</th>
-                    <th>Email</th>
-                    <th>Kota Domisili</th>
-                    <th class="text-center">Total Pesanan</th>
-                    <th>Terdaftar Sejak</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($customers as $customer)
-                    <tr>
-                        <td>
-                            <strong class="text-dark">{{ $customer->full_name }}</strong>
-                        </td>
-                        <td>
-                            <a href="https://wa.me/{{ preg_replace('/^0/', '62', $customer->phone_number) }}" target="_blank" class="text-success text-decoration-none fw-semibold">
-                                <i class="bi bi-whatsapp me-1"></i> {{ $customer->phone_number }}
-                            </a>
-                        </td>
-                        <td>{{ $customer->user?->email ?? '-' }}</td>
-                        <td>{{ $customer->city ?? '-' }}</td>
-                        <td class="text-center">
-                            <span class="badge bg-secondary rounded-pill">{{ $customer->orders_count }} PO</span>
-                        </td>
-                        <td>{{ $customer->created_at->format('d M Y') }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="text-center py-5 text-muted">
-                            <i class="bi bi-people fs-2 d-block mb-2"></i>
-                            Tidak ada data pelanggan yang ditemukan.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+    <section class="owner-customer-search" aria-label="Cari pelanggan">
+        <form action="{{ route('owner.customers.index') }}" method="GET" class="owner-customer-search-form">
+            <label class="visually-hidden" for="customerSearch">Cari nama, nomor WhatsApp, email, atau kota</label>
+            <div class="owner-customer-search-control">
+                <i class="bi bi-search" aria-hidden="true"></i>
+                <input type="search" id="customerSearch" name="search" class="form-control" placeholder="Nama, WhatsApp, email, atau kota" value="{{ request('search') }}" maxlength="100">
+            </div>
+            <button type="submit" class="btn btn-dark owner-customer-search-submit">Cari pelanggan</button>
+            @if(request('search'))
+                <a href="{{ route('owner.customers.index') }}" class="btn btn-outline-secondary owner-customer-reset">Hapus pencarian</a>
+            @endif
+        </form>
+        @if(request('search'))
+            <p class="owner-customer-search-caption">Hasil pencarian untuk “{{ request('search') }}”.</p>
+        @endif
+    </section>
 
-    @if($customers->hasPages())
-        <div class="d-flex justify-content-center mt-4">
-            {{ $customers->links() }}
+    <section class="owner-customer-table-section" aria-labelledby="ownerCustomerTableTitle">
+        <header class="owner-customer-table-header">
+            <h2 id="ownerCustomerTableTitle">Daftar pelanggan</h2>
+            <span>Menampilkan {{ number_format($customers->count(), 0, ',', '.') }} dari {{ number_format($customers->total(), 0, ',', '.') }} hasil</span>
+        </header>
+        <div class="table-responsive owner-customer-table-wrap">
+            <table class="table owner-customer-table align-middle mb-0">
+                <caption class="visually-hidden">Daftar nama, kontak, kota, jumlah pesanan, dan tanggal registrasi pelanggan</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Pelanggan</th>
+                        <th scope="col">Nomor WhatsApp</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Kota</th>
+                        <th scope="col" class="text-end">Pesanan</th>
+                        <th scope="col">Terdaftar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($customers as $customer)
+                        @php
+                            $whatsappPhone = preg_replace('/\D+/', '', $customer->phone_number);
+                            if (str_starts_with($whatsappPhone, '0')) {
+                                $whatsappPhone = '62' . substr($whatsappPhone, 1);
+                            }
+                        @endphp
+                        <tr>
+                            <td class="owner-customer-name">{{ $customer->full_name }}</td>
+                            <td>
+                                @if($whatsappPhone)
+                                    <a class="owner-customer-contact" href="https://wa.me/{{ $whatsappPhone }}" target="_blank" rel="noopener noreferrer">
+                                        {{ $customer->phone_number }} <span aria-hidden="true">↗</span>
+                                    </a>
+                                @else
+                                    <span class="owner-customer-muted">Belum diisi</span>
+                                @endif
+                            </td>
+                            <td>{{ $customer->user?->email ?? '—' }}</td>
+                            <td>{{ $customer->city ?: '—' }}</td>
+                            <td class="text-end">{{ number_format($customer->orders_count, 0, ',', '.') }}</td>
+                            <td>{{ $customer->created_at->format('d M Y') }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6">
+                                <div class="owner-customer-empty">
+                                    <i class="bi bi-people" aria-hidden="true"></i>
+                                    <strong>{{ request('search') ? 'Tidak ada pelanggan yang cocok.' : 'Belum ada pelanggan terdaftar.' }}</strong>
+                                    <span>{{ request('search') ? 'Coba kata kunci nama, nomor WhatsApp, email, atau kota yang lain.' : 'Data pelanggan yang mendaftar akan muncul di halaman ini.' }}</span>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
-    @endif
-</div>
+        @if($customers->hasPages())
+            <div class="owner-customer-pagination">
+                {{ $customers->links() }}
+            </div>
+        @endif
+    </section>
+</section>
 @endsection

@@ -8,7 +8,7 @@ class PoInfoController extends Controller
 {
     public function index()
     {
-        $activePo = PoPeriod::active()->first();
+        $activePo = PoPeriod::cachedActive();
         $pastPoPeriods = PoPeriod::where('status', PoPeriod::STATUS_CLOSED)
             ->latest()
             ->take(5)

@@ -10,10 +10,14 @@ class CustomerController extends Controller
 {
     public function index(Request $request)
     {
+        $validated = $request->validate([
+            'search' => ['nullable', 'string', 'max:100'],
+        ]);
+
         $query = Customer::with(['user'])->withCount('orders');
 
-        if ($request->filled('search')) {
-            $search = $request->search;
+        if (!empty($validated['search'])) {
+            $search = $validated['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('full_name', 'like', "%{$search}%")
                   ->orWhere('phone_number', 'like', "%{$search}%")

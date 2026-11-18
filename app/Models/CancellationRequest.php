@@ -19,6 +19,10 @@ class CancellationRequest extends Model
         'reason',
         'status',
         'admin_notes',
+        'refund_amount',
+        'refund_reference',
+        'refund_proof_path',
+        'refunded_at',
         'reviewed_by',
         'reviewed_at',
     ];
@@ -27,6 +31,8 @@ class CancellationRequest extends Model
     {
         return [
             'reviewed_at' => 'datetime',
+            'refund_amount' => 'decimal:2',
+            'refunded_at' => 'datetime',
         ];
     }
 

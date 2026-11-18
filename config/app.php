@@ -65,7 +65,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'UTC', // Store timestamps in UTC; business date windows are evaluated explicitly in Asia/Jakarta.
 
     /*
     |--------------------------------------------------------------------------

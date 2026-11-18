@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderStatusHistory;
+use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -13,14 +14,19 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
+        $filters = $request->validate([
+            'status' => ['nullable', 'in:' . implode(',', Order::$statuses)],
+            'search' => ['nullable', 'string', 'max:100'],
+        ]);
+
         $query = Order::with(['customer', 'poPeriod', 'payment', 'orderDetails']);
 
-        if ($request->filled('status')) {
-            $query->where('status', $request->input('status'));
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
         }
 
-        if ($request->filled('search')) {
-            $search = $request->input('search');
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('order_number', 'like', "%{$search}%")
                   ->orWhere('recipient_name', 'like', "%{$search}%")
@@ -41,45 +47,66 @@ class OrderController extends Controller
     {
         $order = Order::with(['customer.user', 'poPeriod', 'orderDetails.product', 'payment', 'statusHistories.changer', 'cancellationRequest'])
             ->findOrFail($id);
+        $nextStatuses = $order->nextOperationalStatuses();
 
-        return view('admin.orders.show', compact('order'));
+        return view('admin.orders.show', compact('order', 'nextStatuses'));
     }
 
     public function updateStatus(Request $request, $id)
     {
-        $order = Order::findOrFail($id);
-
-        $request->validate([
+        $validated = $request->validate([
             'new_status' => ['required', 'string', 'in:' . implode(',', Order::$statuses)],
             'remarks' => ['nullable', 'string', 'max:255'],
+            'courier' => ['nullable', 'string', 'max:50'],
+            'tracking_number' => ['nullable', 'string', 'max:100'],
+            'shipping_cost' => ['nullable', 'numeric', 'min:0', 'max:9999999999'],
         ]);
 
-        $previousStatus = $order->status;
-        $newStatus = $request->input('new_status');
-
-        if ($previousStatus === $newStatus) {
-            return redirect()->back()->with('warning', 'Status yang dipilih sama dengan status pesanan saat ini.');
+        if ($validated['new_status'] === Order::STATUS_SHIPPED) {
+            $request->validate([
+                'courier' => ['required', 'string', 'max:50'],
+                'tracking_number' => ['required', 'string', 'max:100'],
+            ]);
         }
 
-        if ($previousStatus === Order::STATUS_CANCELLED) {
-            return redirect()->back()->with('error', 'Pesanan yang telah dibatalkan tidak dapat diubah statusnya lagi.');
-        }
+        $newStatus = $validated['new_status'];
+        $order = DB::transaction(function () use ($id, $newStatus, $validated) {
+            $order = Order::query()->whereKey($id)->lockForUpdate()->firstOrFail();
 
-        if ($previousStatus === Order::STATUS_COMPLETED && $newStatus !== Order::STATUS_COMPLETED) {
-            return redirect()->back()->with('error', 'Pesanan yang telah selesai tidak dapat diubah kembali ke status sebelumnya.');
-        }
+            if (!in_array($newStatus, $order->nextOperationalStatuses(), true)) {
+                return null;
+            }
 
-        DB::transaction(function () use ($order, $previousStatus, $newStatus, $request) {
-            $order->update(['status' => $newStatus]);
+            $previousStatus = $order->status;
+            $before = ['status' => $previousStatus, 'courier' => $order->courier, 'tracking_number' => $order->tracking_number, 'shipping_cost' => $order->shipping_cost];
+            $order->update([
+                'status' => $newStatus,
+                'courier' => $validated['courier'] ?? $order->courier,
+                'tracking_number' => $validated['tracking_number'] ?? $order->tracking_number,
+                'shipping_cost' => $validated['shipping_cost'] ?? $order->shipping_cost,
+            ]);
 
             OrderStatusHistory::create([
                 'order_id' => $order->id,
                 'previous_status' => $previousStatus,
                 'new_status' => $newStatus,
-                'remarks' => $request->input('remarks') ?: "Status diperbarui oleh Admin: $newStatus",
+                'remarks' => ($validated['remarks'] ?? null) ?: "Status diperbarui oleh Admin: $newStatus",
                 'changed_by' => Auth::id(),
             ]);
+
+            AuditLog::record('order.status_updated', $order, $before, [
+                'status' => $order->status,
+                'courier' => $order->courier,
+                'tracking_number' => $order->tracking_number,
+                'shipping_cost' => $order->shipping_cost,
+            ]);
+
+            return $order;
         });
+
+        if (!$order) {
+            return redirect()->back()->with('error', 'Transisi status pesanan ini tidak valid atau statusnya telah berubah. Muat ulang halaman lalu coba kembali.');
+        }
 
         return redirect()->route('admin.orders.show', $order->id)
             ->with('success', "Status pesanan #{$order->order_number} berhasil diperbarui menjadi: {$newStatus}");

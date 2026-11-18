@@ -1,54 +1,60 @@
 <div class="dashboard-sidebar">
-    <!-- User Profile Header -->
-    <div class="px-3 pb-3 mb-3 border-bottom">
+    <!-- User Profile Identity Card -->
+    <div class="sidebar-profile-card">
         <div class="d-flex align-items-center gap-3">
-            <div class="stat-icon" style="background: var(--color-champagne-light); color: var(--color-mocha); width: 42px; height: 42px; font-size: 1.1rem;">
-                <i class="bi bi-shield-lock-fill"></i>
+            <div class="stat-icon sidebar-profile-icon">
+                <i class="bi bi-shield-lock-fill" aria-hidden="true"></i>
             </div>
-            <div>
-                <h6 class="mb-0 fw-bold">{{ auth()->user()->name ?? 'Admin Uyuy Jastip' }}</h6>
-                <span class="badge bg-info text-dark" style="font-size: 0.7rem;">Staf Operasional</span>
+            <div class="sidebar-profile-meta">
+                <h2 class="sidebar-profile-name">{{ auth()->user()->name ?? 'Admin Uyuy Jastip' }}</h2>
+                <span class="sidebar-role-badge">
+                    {{ auth()->user()?->isOwner() ? 'Owner' : 'Staf Operasional' }}
+                </span>
             </div>
         </div>
-        <div class="mt-2 text-muted small" style="font-size: 0.72rem;">
-            <i class="bi bi-info-circle me-1"></i> Wewenang: Verifikasi pembayaran, pembaruan status, & penanganan pembatalan.
+        <div class="sidebar-profile-note">
+            <i class="bi bi-info-circle me-1" aria-hidden="true"></i> Wewenang: Verifikasi pembayaran, pembaruan status, & penanganan pembatalan.
         </div>
     </div>
 
     <!-- Navigation Menu -->
-    <div class="sidebar-heading">Menu Operasional</div>
-    <nav class="nav flex-column mb-3">
-        <a class="sidebar-menu-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
-            <i class="bi bi-speedometer2"></i>
-            <span>Dashboard Operasional</span>
-        </a>
-        <a class="sidebar-menu-link {{ request()->routeIs('admin.orders*') ? 'active' : '' }}" href="{{ route('admin.orders.index') }}">
-            <i class="bi bi-box-seam"></i>
-            <span>Daftar Pesanan</span>
-        </a>
-        <a class="sidebar-menu-link {{ request()->routeIs('admin.payments*') ? 'active' : '' }}" href="{{ route('admin.payments.index') }}">
-            <i class="bi bi-credit-card-2-front"></i>
-            <span>Pemeriksaan Pembayaran</span>
-        </a>
-        <a class="sidebar-menu-link {{ request()->routeIs('admin.cancellations*') ? 'active' : '' }}" href="{{ route('admin.cancellations.index') }}">
-            <i class="bi bi-x-octagon"></i>
-            <span>Permohonan Pembatalan</span>
-        </a>
-    </nav>
-
-    <!-- Operational Restrictions Notice (According to Proposal) -->
-    <div class="p-3 mx-2 rounded-3 bg-light border text-muted small" style="font-size: 0.72rem;">
-        <strong class="d-block text-secondary mb-1"><i class="bi bi-shield-shaded me-1"></i> Batasan Wewenang:</strong>
-        Admin tidak berwenang membuka/menutup PO, mengubah master produk, atau mengakses rekapitulasi Owner.
+    <div class="sidebar-nav-section">
+        <div class="sidebar-heading">Menu Operasional</div>
+        <nav class="nav flex-column" aria-label="Navigasi Admin">
+            <a class="sidebar-menu-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}" @if(request()->routeIs('admin.dashboard')) aria-current="page" @endif>
+                <i class="bi bi-speedometer2" aria-hidden="true"></i>
+                <span>Dashboard Operasional</span>
+            </a>
+            <a class="sidebar-menu-link {{ request()->routeIs('admin.orders*') ? 'active' : '' }}" href="{{ route('admin.orders.index') }}" @if(request()->routeIs('admin.orders*')) aria-current="page" @endif>
+                <i class="bi bi-box-seam" aria-hidden="true"></i>
+                <span>Daftar Pesanan</span>
+            </a>
+            <a class="sidebar-menu-link {{ request()->routeIs('admin.payments*') ? 'active' : '' }}" href="{{ route('admin.payments.index') }}" @if(request()->routeIs('admin.payments*')) aria-current="page" @endif>
+                <i class="bi bi-credit-card-2-front" aria-hidden="true"></i>
+                <span>Pemeriksaan Pembayaran</span>
+            </a>
+            <a class="sidebar-menu-link {{ request()->routeIs('admin.cancellations*') ? 'active' : '' }}" href="{{ route('admin.cancellations.index') }}" @if(request()->routeIs('admin.cancellations*')) aria-current="page" @endif>
+                <i class="bi bi-x-octagon" aria-hidden="true"></i>
+                <span>Permohonan Pembatalan</span>
+            </a>
+        </nav>
     </div>
 
-    <hr class="my-3">
+    <!-- Footer Restrictions & Logout Docked at Bottom -->
+    <div class="sidebar-footer">
+        <div class="sidebar-access-note">
+            <strong><i class="bi bi-shield-shaded" aria-hidden="true"></i> Batasan Wewenang</strong>
+            @if(auth()->user()?->isOwner())
+                Pengelolaan periode PO, produk, dan rekapitulasi tersedia di Panel Owner.
+            @else
+                Admin tidak berwenang membuka/menutup PO, mengubah master produk, atau mengakses rekapitulasi Owner.
+            @endif
+        </div>
 
-    <div class="px-2">
         <form action="{{ route('logout') }}" method="POST">
             @csrf
-            <button type="submit" class="btn btn-outline-danger btn-sm w-100 d-flex align-items-center justify-content-center gap-2">
-                <i class="bi bi-box-arrow-right"></i> Keluar
+            <button type="submit" class="btn sidebar-logout-btn">
+                <i class="bi bi-box-arrow-right" aria-hidden="true"></i> Keluar
             </button>
         </form>
     </div>

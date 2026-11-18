@@ -7,7 +7,7 @@
 
 <button type="{{ $type }}" {{ $attributes->merge(['class' => "btn btn-{$variant} " . $class]) }}>
     @if($icon)
-        <i class="{{ $icon }} me-1"></i>
+        <i class="{{ $icon }} me-1" aria-hidden="true"></i>
     @endif
     {{ $slot }}
 </button>

@@ -37,7 +37,7 @@
 @endphp
 
 <span class="badge-uyuy {{ $class }}">
-    <i class="bi {{ $icon }}"></i>
+    <i class="bi {{ $icon }}" aria-hidden="true"></i>
     {{ $status }}
 </span>
 

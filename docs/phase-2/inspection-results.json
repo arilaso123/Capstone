@@ -1,0 +1,348 @@
+{
+  "timestamp": "2026-11-13T04:10:19.854Z",
+  "baseUrl": "http://127.0.0.1:8000",
+  "browser": "Chrome/157.0.8103.51",
+  "consoleLogs": [],
+  "networkErrors": [
+    {
+      "url": "http://127.0.0.1:8000/owner/dashboard",
+      "status": 403,
+      "statusText": "Forbidden",
+      "mimeType": "text/html"
+    },
+    {
+      "url": "http://127.0.0.1:8000/owner/produk/1/edit",
+      "status": 500,
+      "statusText": "Internal Server Error",
+      "mimeType": "text/html"
+    },
+    {
+      "url": "http://127.0.0.1:8000/halaman-pasti-tidak-ada-404",
+      "status": 404,
+      "statusText": "Not Found",
+      "mimeType": "text/html"
+    }
+  ],
+  "inspectedPages": [
+    {
+      "category": "public",
+      "pageName": "public-home",
+      "route": "/",
+      "viewports": [
+        "desktop",
+        "laptop",
+        "tablet",
+        "mobile",
+        "mobile_compact",
+        "full_hd"
+      ]
+    },
+    {
+      "category": "public",
+      "pageName": "public-catalog",
+      "route": "/katalog",
+      "viewports": [
+        "desktop",
+        "tablet",
+        "mobile",
+        "mobile_compact"
+      ]
+    },
+    {
+      "category": "public",
+      "pageName": "public-product-detail",
+      "route": "/produk/1",
+      "viewports": [
+        "desktop",
+        "mobile",
+        "mobile_compact"
+      ]
+    },
+    {
+      "category": "public",
+      "pageName": "public-po-info",
+      "route": "/informasi-po",
+      "viewports": [
+        "desktop",
+        "mobile"
+      ]
+    },
+    {
+      "category": "auth",
+      "pageName": "auth-login",
+      "route": "/login",
+      "viewports": [
+        "desktop",
+        "mobile",
+        "mobile_compact"
+      ]
+    },
+    {
+      "category": "auth",
+      "pageName": "auth-register",
+      "route": "/register",
+      "viewports": [
+        "desktop",
+        "mobile",
+        "mobile_compact"
+      ]
+    },
+    {
+      "category": "auth",
+      "pageName": "auth-forgot-password",
+      "route": "/forgot-password",
+      "viewports": [
+        "desktop",
+        "mobile"
+      ]
+    },
+    {
+      "category": "auth",
+      "pageName": "auth-reset-password",
+      "route": "/reset-password/sample-token",
+      "viewports": [
+        "desktop",
+        "mobile"
+      ]
+    },
+    {
+      "category": "customer",
+      "pageName": "customer-dashboard",
+      "route": "/pelanggan/dashboard",
+      "viewports": [
+        "desktop",
+        "laptop",
+        "tablet",
+        "mobile",
+        "mobile_compact",
+        "full_hd"
+      ]
+    },
+    {
+      "category": "customer",
+      "pageName": "customer-cart",
+      "route": "/pelanggan/keranjang",
+      "viewports": [
+        "desktop",
+        "mobile",
+        "mobile_compact"
+      ]
+    },
+    {
+      "category": "customer",
+      "pageName": "customer-orders",
+      "route": "/pelanggan/pesanan",
+      "viewports": [
+        "desktop",
+        "tablet",
+        "mobile"
+      ]
+    },
+    {
+      "category": "customer",
+      "pageName": "customer-order-detail",
+      "route": "/pelanggan/pesanan/1",
+      "viewports": [
+        "desktop",
+        "mobile"
+      ]
+    },
+    {
+      "category": "customer",
+      "pageName": "customer-payment",
+      "route": "/pelanggan/pesanan/1/pembayaran",
+      "viewports": [
+        "desktop",
+        "mobile"
+      ]
+    },
+    {
+      "category": "customer",
+      "pageName": "customer-cancellation",
+      "route": "/pelanggan/pesanan/10/batal",
+      "viewports": [
+        "desktop",
+        "mobile"
+      ]
+    },
+    {
+      "category": "admin",
+      "pageName": "admin-dashboard",
+      "route": "/admin/dashboard",
+      "viewports": [
+        "desktop",
+        "laptop",
+        "tablet",
+        "mobile",
+        "mobile_compact",
+        "full_hd"
+      ]
+    },
+    {
+      "category": "admin",
+      "pageName": "admin-orders",
+      "route": "/admin/pesanan",
+      "viewports": [
+        "desktop",
+        "tablet",
+        "mobile"
+      ]
+    },
+    {
+      "category": "admin",
+      "pageName": "admin-order-detail",
+      "route": "/admin/pesanan/1",
+      "viewports": [
+        "desktop",
+        "mobile"
+      ]
+    },
+    {
+      "category": "admin",
+      "pageName": "admin-payment-queue",
+      "route": "/admin/pembayaran",
+      "viewports": [
+        "desktop",
+        "tablet",
+        "mobile"
+      ]
+    },
+    {
+      "category": "admin",
+      "pageName": "admin-payment-verification",
+      "route": "/admin/pembayaran/2/verifikasi",
+      "viewports": [
+        "desktop",
+        "mobile"
+      ]
+    },
+    {
+      "category": "admin",
+      "pageName": "admin-cancellation-queue",
+      "route": "/admin/pembatalan",
+      "viewports": [
+        "desktop",
+        "tablet",
+        "mobile"
+      ]
+    },
+    {
+      "category": "admin",
+      "pageName": "admin-cancellation-detail",
+      "route": "/admin/pembatalan/1",
+      "viewports": [
+        "desktop",
+        "mobile"
+      ]
+    },
+    {
+      "category": "auth",
+      "pageName": "error-403",
+      "route": "/owner/dashboard",
+      "viewports": [
+        "desktop",
+        "mobile"
+      ]
+    },
+    {
+      "category": "owner",
+      "pageName": "owner-dashboard",
+      "route": "/owner/dashboard",
+      "viewports": [
+        "desktop",
+        "laptop",
+        "tablet",
+        "mobile",
+        "mobile_compact",
+        "full_hd"
+      ]
+    },
+    {
+      "category": "owner",
+      "pageName": "owner-po-periods",
+      "route": "/owner/periode-po",
+      "viewports": [
+        "desktop",
+        "tablet",
+        "mobile"
+      ]
+    },
+    {
+      "category": "owner",
+      "pageName": "owner-po-create",
+      "route": "/owner/periode-po/tambah",
+      "viewports": [
+        "desktop",
+        "mobile"
+      ]
+    },
+    {
+      "category": "owner",
+      "pageName": "owner-po-edit",
+      "route": "/owner/periode-po/4/edit",
+      "viewports": [
+        "desktop",
+        "mobile"
+      ]
+    },
+    {
+      "category": "owner",
+      "pageName": "owner-products",
+      "route": "/owner/produk",
+      "viewports": [
+        "desktop",
+        "tablet",
+        "mobile"
+      ]
+    },
+    {
+      "category": "owner",
+      "pageName": "owner-product-create",
+      "route": "/owner/produk/tambah",
+      "viewports": [
+        "desktop",
+        "mobile"
+      ]
+    },
+    {
+      "category": "owner",
+      "pageName": "owner-product-edit",
+      "route": "/owner/produk/1/edit",
+      "viewports": [
+        "desktop",
+        "mobile"
+      ]
+    },
+    {
+      "category": "owner",
+      "pageName": "owner-recap",
+      "route": "/owner/rekapitulasi",
+      "viewports": [
+        "desktop",
+        "laptop",
+        "tablet",
+        "mobile",
+        "full_hd"
+      ]
+    },
+    {
+      "category": "owner",
+      "pageName": "owner-customers",
+      "route": "/owner/pelanggan",
+      "viewports": [
+        "desktop",
+        "tablet",
+        "mobile"
+      ]
+    },
+    {
+      "category": "auth",
+      "pageName": "error-404",
+      "route": "/halaman-pasti-tidak-ada-404",
+      "viewports": [
+        "desktop",
+        "mobile"
+      ]
+    }
+  ]
+}

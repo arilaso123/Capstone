@@ -1,174 +1,170 @@
 @extends('layouts.app')
 
-@section('title', 'Unggah Bukti Pembayaran #' . $order->order_number)
+@section('title', 'Pembayaran #' . $order->order_number)
 
 @section('content')
-<!-- Header Banner -->
-<div class="py-4 border-bottom" style="background: radial-gradient(circle at 10% 20%, #FDFBF7 0%, #F4ECE3 90%); border-color: rgba(216, 197, 174, 0.4) !important;">
-    <div class="container">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-1 small">
-                <li class="breadcrumb-item"><a href="{{ route('home') }}" class="text-decoration-none" style="color: var(--color-mocha);">Beranda</a></li>
-                <li class="breadcrumb-item"><a href="{{ route('customer.dashboard') }}" class="text-decoration-none" style="color: var(--color-mocha);">Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="{{ route('customer.orders.index') }}" class="text-decoration-none" style="color: var(--color-mocha);">Pesanan Saya</a></li>
-                <li class="breadcrumb-item"><a href="{{ route('customer.orders.show', $order->id) }}" class="text-decoration-none" style="color: var(--color-mocha);">{{ $order->order_number }}</a></li>
-                <li class="breadcrumb-item active text-secondary" aria-current="page">Unggah Bukti Transfer</li>
-            </ol>
-        </nav>
-        <h1 class="h2 fw-bold font-heading mb-0" style="color: var(--color-charcoal); letter-spacing: -0.02em;">Instruksi & Unggah Bukti Pembayaran</h1>
-    </div>
-</div>
+<div class="container py-5 customer-payment-page">
+    <nav aria-label="Breadcrumb" class="customer-checkout-breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ route('home') }}">Beranda</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('customer.dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('customer.orders.index') }}">Pesanan Saya</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('customer.orders.show', $order->id) }}">{{ $order->order_number }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Pembayaran</li>
+        </ol>
+    </nav>
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <!-- Payment Instructions Card -->
-            <x-card class="p-4 p-md-5 mb-4 border-0 shadow">
-                <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom" style="border-color: rgba(216, 197, 174, 0.3) !important;">
-                    <i class="bi bi-bank fs-4" style="color: var(--color-mocha);"></i>
-                    <h5 class="fw-bold font-heading mb-0 text-dark">Petunjuk Transfer Bank Central Asia (BCA)</h5>
-                </div>
+    <x-customer-portal-nav />
 
-                <p class="small text-secondary mb-3" style="line-height: 1.6;">
-                    Silakan selesaikan pembayaran tagihan pre-order Anda sesuai total nominal yang tertera melalui rekening merchant resmi Uyuy Jastip di bawah ini:
-                </p>
-
-                <!-- Copyable Account Box -->
-                <div class="p-4 rounded-4 mb-3" style="background: #FAF8F5; border: 1.5px solid rgba(216, 197, 174, 0.5);">
-                    <div class="row g-3 align-items-center">
-                        <div class="col-sm-6">
-                            <span class="small text-muted d-block" style="font-size: 0.78rem;">Nomor Rekening BCA:</span>
-                            <div class="d-flex align-items-center gap-2 mt-1">
-                                <span class="fs-4 fw-bold font-monospace text-dark" id="rekNumber">8720-1928-33</span>
-                                <button type="button" class="btn btn-sm btn-outline-mocha px-2 py-1" onclick="copyRekening()" title="Salin Nomor">
-                                    <i class="bi bi-clipboard"></i> Salin
-                                </button>
-                            </div>
-                            <span class="small text-secondary d-block mt-1" style="font-size: 0.78rem;">Atas Nama: <strong>UYUY JASTIP PARFUM</strong></span>
-                        </div>
-                        <div class="col-sm-6 text-sm-end">
-                            <span class="small text-muted d-block" style="font-size: 0.78rem;">Total yang Wajib Ditransfer:</span>
-                            <span class="fs-3 fw-bold font-heading text-dark d-block">
-                                Rp {{ number_format($order->total_amount, 0, ',', '.') }}
-                            </span>
-                            <span class="badge rounded-pill" style="background: rgba(139, 107, 80, 0.15); color: var(--color-mocha); font-size: 0.75rem;">
-                                Faktur #{{ $order->order_number }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="p-3 rounded-3 small text-secondary" style="background: rgba(244, 236, 227, 0.6); border-left: 3px solid var(--color-mocha); line-height: 1.5;">
-                    <i class="bi bi-info-circle-fill me-1" style="color: var(--color-mocha);"></i> Mohon cantumkan kode faktur <code>{{ $order->order_number }}</code> pada keterangan transfer agar admin dapat langsung memvalidasi tanpa delay.
-                </div>
-            </x-card>
-
-            <!-- Upload Form Card -->
-            <x-card class="p-4 p-md-5 border-0 shadow">
-                <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom" style="border-color: rgba(216, 197, 174, 0.3) !important;">
-                    <div>
-                        <h5 class="fw-bold font-heading mb-0 text-dark">Formulir Pengunggahan Bukti</h5>
-                        <span class="small text-secondary">Kirim berkas foto struk atau screenshot mutasi bank</span>
-                    </div>
-                    @if($order->payment?->proof_file_path)
-                        <span class="badge rounded-pill px-3 py-1 bg-info">
-                            Bukti Sebelumnya Tersimpan
-                        </span>
-                    @endif
-                </div>
-
-                <form action="{{ route('customer.orders.payment.post', $order->id) }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-
-                    <!-- Method -->
-                    <div class="mb-3">
-                        <label for="payment_method" class="form-label small fw-semibold text-secondary mb-1">Metode Pembayaran</label>
-                        <div class="input-group-uyuy d-flex align-items-center">
-                            <span class="input-group-text"><i class="bi bi-bank"></i></span>
-                            <input type="text" class="form-control form-control-uyuy" id="payment_method" name="payment_method" value="BCA Merchant (Transfer Non-Tunai)" readonly style="background-color: #FAF8F5;">
-                        </div>
-                    </div>
-
-                    <!-- Amount -->
-                    <div class="mb-3">
-                        <label for="amount" class="form-label small fw-semibold text-secondary mb-1">
-                            Jumlah Nominal yang Ditransfer (Rp) <span class="text-danger">*</span>
-                        </label>
-                        <div class="input-group-uyuy d-flex align-items-center @error('amount') border-danger @enderror">
-                            <span class="input-group-text fw-bold text-muted">Rp</span>
-                            <input type="number" class="form-control form-control-uyuy" id="amount" name="amount" value="{{ old('amount', (int)$order->total_amount) }}" required>
-                        </div>
-                        @error('amount')
-                            <div class="text-danger small mt-1 ps-1" style="font-size: 0.82rem;">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <!-- File Proof -->
-                    <div class="mb-4">
-                        <label for="proof_file" class="form-label small fw-semibold text-secondary mb-1">
-                            Foto Struk / Screenshot Bukti Transfer <span class="text-danger">*</span>
-                        </label>
-                        <div class="input-group-uyuy d-flex align-items-center p-2 @error('proof_file') border-danger @enderror">
-                            <input type="file" class="form-control border-0 bg-transparent shadow-none" id="proof_file" name="proof_file" accept="image/jpeg,image/png,image/jpg,application/pdf" required onchange="previewImage(this)">
-                        </div>
-                        <span class="text-muted d-block ps-1 mt-1" style="font-size: 0.75rem;">Format didukung: JPG, PNG, atau PDF (maks. 2 MB). Pastikan nominal dan nama rekening terlihat jelas.</span>
-                        @error('proof_file')
-                            <div class="text-danger small mt-1 ps-1" style="font-size: 0.82rem;">{{ $message }}</div>
-                        @enderror
-
-                        <!-- Image Preview Box -->
-                        <div id="imagePreviewContainer" class="mt-3 text-center d-none">
-                            <span class="small text-muted d-block mb-1">Pratinjau Berkas:</span>
-                            <img id="imagePreview" src="#" alt="Pratinjau Bukti" class="rounded-3 shadow-sm border" style="max-height: 220px; max-width: 100%; object-fit: contain;">
-                        </div>
-                    </div>
-
-                    <!-- Retention Notice -->
-                    <div class="p-3 rounded-3 small text-secondary mb-4" style="background: #FAF8F5; border: 1px solid rgba(216, 197, 174, 0.4); line-height: 1.5;">
-                        <strong class="text-dark"><i class="bi bi-shield-lock me-1" style="color: var(--color-mocha);"></i> Kebijakan Retensi Berkas:</strong>
-                        Sesuai standar operasional dan perlindungan privasi data, berkas bukti transfer Anda disimpan dengan masa simpan maksimal 30 hari kalender setelah transaksi selesai.
-                    </div>
-
-                    <!-- Buttons -->
-                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-                        <a href="{{ route('customer.orders.show', $order->id) }}" class="btn btn-outline-secondary py-2 px-3">
-                            <i class="bi bi-arrow-left me-1"></i> Kembali ke Pesanan
-                        </a>
-                        <x-button type="submit" variant="mocha" class="py-2 px-4 shadow-sm" icon="bi bi-cloud-arrow-up">
-                            Kirim Bukti Pembayaran
-                        </x-button>
-                    </div>
-                </form>
-            </x-card>
+    <header class="customer-payment-header">
+        <div>
+            <p class="home-eyebrow">Pembayaran pesanan</p>
+            <h1>Instruksi transfer</h1>
+            <p>Gunakan detail transaksi ini, lalu kirim bukti pembayaran untuk diperiksa Admin.</p>
         </div>
+        <x-status-badge :status="$order->status" />
+    </header>
+
+    <div class="customer-payment-layout">
+        <div class="customer-payment-instructions">
+            <section class="customer-payment-panel" aria-labelledby="customer-bank-details-heading">
+                <header><p class="home-eyebrow">Transfer bank</p><h2 id="customer-bank-details-heading">Rekening pembayaran</h2></header>
+                <p class="customer-payment-intro">Transfer sesuai jumlah yang tertera dan pastikan nomor pesanan dicantumkan pada keterangan transaksi.</p>
+
+                @if(config('jastip.bca_account'))
+                    <div class="customer-payment-account">
+                        <div>
+                            <span>Bank</span>
+                            <strong>BCA</strong>
+                        </div>
+                        <div>
+                            <span>Nomor rekening</span>
+                            <div class="customer-payment-account-number">
+                                <strong id="customerBankAccount">{{ config('jastip.bca_account') }}</strong>
+                                <button type="button" id="copyBankAccount" data-copy-account="{{ preg_replace('/[^0-9]/', '', (string) config('jastip.bca_account')) }}" aria-label="Salin nomor rekening BCA"><i class="bi bi-copy me-1" id="copyIcon" aria-hidden="true"></i><span id="copyButtonText">Salin</span></button>
+                            </div>
+                        </div>
+                        <div>
+                            <span>Atas nama</span>
+                            <strong>{{ config('jastip.bca_name') ?: 'Uyuy Jastip' }}</strong>
+                        </div>
+                    </div>
+                    <p class="customer-payment-copy-status" id="copyBankAccountStatus" role="status" aria-live="polite"></p>
+                @else
+                    <div class="customer-payment-notice" role="status"><strong>Detail rekening belum tersedia.</strong> Hubungi Admin untuk memperoleh instruksi pembayaran sebelum melakukan transfer.</div>
+                @endif
+
+                <div class="customer-payment-amount">
+                    <div><span>Nomor pesanan</span><strong>{{ $order->order_number }}</strong></div>
+                    <div><span>Jumlah tagihan</span><strong>Rp {{ number_format($order->total_amount, 0, ',', '.') }}</strong></div>
+                </div>
+
+                @if($order->payment_deadline_at)
+                    <div class="customer-payment-deadline-badge" role="region" aria-label="Informasi batas pembayaran">
+                        <div class="customer-payment-deadline-icon" aria-hidden="true">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                        <div class="customer-payment-deadline-content">
+                            <span class="customer-payment-deadline-label">Batas pembayaran</span>
+                            <strong class="customer-payment-deadline-time">{{ $order->payment_deadline_at->timezone('Asia/Jakarta')->format('d F Y, H:i') }} WIB</strong>
+                            <p class="customer-payment-deadline-desc">Selesaikan transfer dan unggah bukti sebelum batas waktu berakhir. Pesanan yang belum dibayar akan diproses sesuai batas waktu {{ config('jastip.payment_deadline_hours', 24) }} jam sejak dibuat.</p>
+                        </div>
+                    </div>
+                @endif
+                <p class="customer-payment-note">Jika berlaku, ongkos kirim dikonfirmasi terpisah oleh Admin. Pastikan jumlah yang ditransfer sesuai tagihan pesanan dan instruksi pembayaran.</p>
+            </section>
+
+            <section class="customer-payment-panel customer-payment-upload-help" aria-labelledby="customer-payment-steps-heading">
+                <header><p class="home-eyebrow">Langkah berikutnya</p><h2 id="customer-payment-steps-heading">Setelah transfer</h2></header>
+                <ol>
+                    <li>Simpan bukti transfer yang menampilkan nominal dan waktu transaksi.</li>
+                    <li>Isi nominal dan unggah berkas pada formulir di samping.</li>
+                    <li>Admin akan memeriksa bukti secara manual dan statusnya tampil di detail pesanan.</li>
+                </ol>
+                <p>Bukti pembayaran disimpan sesuai kebijakan retensi yang ditetapkan Owner dan hanya dapat diakses pihak berwenang.</p>
+            </section>
+        </div>
+
+        <section class="customer-payment-panel customer-payment-form-panel" aria-labelledby="customer-payment-upload-heading">
+            <header>
+                <p class="home-eyebrow">Kirim bukti</p>
+                <h2 id="customer-payment-upload-heading">Unggah pembayaran</h2>
+                <p>Format JPG, PNG, atau PDF. Maksimal 2 MB.</p>
+            </header>
+
+            @if($order->payment?->proof_file_path)
+                @if(preg_match('/^https?:\/\//i', $order->payment->proof_file_path))
+                    <p class="customer-payment-notice">Bukti lama berasal dari sumber eksternal. Unggah bukti baru agar Admin dapat memeriksanya di sistem.</p>
+                @else
+                    <p class="customer-payment-notice">Bukti sebelumnya sudah tersimpan. Anda dapat mengunggah bukti baru jika diperlukan.</p>
+                @endif
+            @endif
+
+            <form action="{{ route('customer.orders.payment.post', $order->id) }}" method="POST" enctype="multipart/form-data" class="customer-payment-form" id="customerPaymentForm">
+                @csrf
+                <div class="customer-checkout-field">
+                    <label for="payment_method">Metode pembayaran</label>
+                    <input type="text" id="payment_method" name="payment_method" value="BCA Merchant (Transfer Non-Tunai)" readonly>
+                </div>
+
+                <div class="customer-checkout-field">
+                    <label for="amount_display">Jumlah yang ditransfer <span aria-hidden="true">*</span></label>
+                    <div class="customer-payment-amount-box">
+                        <span class="customer-payment-currency-tag" aria-hidden="true">IDR</span>
+                        <input type="text" id="amount_display" class="customer-payment-amount-input" value="Rp {{ number_format($order->total_amount, 0, ',', '.') }}" readonly aria-label="Jumlah yang ditransfer dalam Rupiah">
+                    </div>
+                    <input type="hidden" id="amount" name="amount" value="{{ number_format((float) $order->total_amount, 2, '.', '') }}">
+                    <small class="customer-payment-amount-hint">Nominal transfer harus tepat sesuai tagihan pesanan.</small>
+                    @error('amount')<p class="customer-checkout-error" id="amount-error">{{ $message }}</p>@enderror
+                </div>
+
+                <div class="customer-checkout-field">
+                    <label for="proof_file" id="proofFileLabel">Berkas bukti pembayaran <span aria-hidden="true">*</span></label>
+                    <div class="customer-payment-dropzone" id="paymentDropzone" role="button" tabindex="0" aria-labelledby="proofFileLabel" aria-describedby="proof-file-help">
+                        <div class="customer-payment-dropzone-icon" aria-hidden="true">
+                            <i class="bi bi-cloud-arrow-up"></i>
+                        </div>
+                        <div class="customer-payment-dropzone-text">
+                            <strong>Tarik & letakkan berkas bukti di sini</strong>
+                            <span>atau <span class="customer-payment-dropzone-browse">pilih berkas dari perangkat</span></span>
+                        </div>
+                        <span class="customer-payment-dropzone-meta" id="proof-file-help">Format JPG, PNG, atau PDF. Maksimal 2 MB.</span>
+                        <input type="file" id="proof_file" name="proof_file" accept="image/jpeg,image/png,image/jpg,application/pdf" class="customer-payment-file-input" required aria-invalid="{{ $errors->has('proof_file') ? 'true' : 'false' }}" aria-describedby="{{ $errors->has('proof_file') ? 'proof-file-help proof-file-error' : 'proof-file-help' }}">
+                    </div>
+                    @error('proof_file')<p class="customer-checkout-error" id="proof-file-error">{{ $message }}</p>@enderror
+                </div>
+
+                <div class="customer-payment-preview-card" id="customerPaymentPreview" hidden aria-live="polite">
+                    <div class="customer-payment-preview-header">
+                        <span class="customer-payment-preview-title">
+                            <i class="bi bi-check-circle-fill text-success me-2" aria-hidden="true"></i> Berkas siap diunggah
+                        </span>
+                        <button type="button" id="removePaymentPreview" class="customer-payment-preview-remove" aria-label="Ganti berkas">
+                            <i class="bi bi-arrow-repeat me-1" aria-hidden="true"></i> Ganti
+                        </button>
+                    </div>
+                    <div class="customer-payment-preview-body">
+                        <div class="customer-payment-preview-thumb-box">
+                            <img id="customerPaymentPreviewImage" src="" alt="Pratinjau bukti pembayaran" class="customer-payment-preview-img" hidden>
+                            <div id="customerPaymentPreviewPdf" class="customer-payment-preview-pdf" hidden aria-hidden="true">
+                                <i class="bi bi-file-earmark-pdf-fill"></i>
+                            </div>
+                        </div>
+                        <div class="customer-payment-preview-info">
+                            <p id="customerPaymentPreviewName" class="customer-payment-preview-filename"></p>
+                            <span id="customerPaymentPreviewSize" class="customer-payment-preview-filesize"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="customer-payment-retention"><strong>Privasi berkas.</strong> Akses bukti transfer dibatasi kepada pihak yang berwenang. Masa simpan mengikuti kebijakan operasional Owner.</p>
+
+                <div class="customer-payment-form-actions">
+                    <a href="{{ route('customer.orders.show', $order->id) }}">Kembali ke pesanan</a>
+                    <button type="submit">Kirim bukti pembayaran <span aria-hidden="true">→</span></button>
+                </div>
+            </form>
+        </section>
     </div>
 </div>
 @endsection
-
-@push('scripts')
-<script>
-    function copyRekening() {
-        navigator.clipboard.writeText('8720192833').then(() => {
-            alert('Nomor rekening BCA (8720192833) berhasil disalin ke clipboard!');
-        });
-    }
-
-    function previewImage(input) {
-        const container = document.getElementById('imagePreviewContainer');
-        const preview = document.getElementById('imagePreview');
-        if (input.files && input.files[0]) {
-            const file = input.files[0];
-            if (file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    preview.src = e.target.result;
-                    container.classList.remove('d-none');
-                }
-                reader.readAsDataURL(file);
-            } else {
-                container.classList.add('d-none');
-            }
-        }
-    }
-</script>
-@endpush

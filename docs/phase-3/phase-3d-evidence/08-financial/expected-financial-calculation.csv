@@ -1,0 +1,10 @@
+Metric,Expected Value,Application Value,Variance,Status
+"Total Orders",8,8,0,PASS
+"Verified Orders Count",5,5,0,PASS
+"Unpaid Orders Count",3,3,0,PASS
+"Completed Orders Count",1,1,0,PASS
+"Cancelled Orders Count",1,1,0,PASS
+"Procurement Total Items (Verified Only)",6,6,0,PASS
+"Verified Gross Revenue (Rp)",890000,890000,0,PASS
+"Procurement Total Cost (Rp)",590000,590000,0,PASS
+"Total Recorded Refund (Rp)",150000,150000,0,PASS

@@ -3,22 +3,24 @@
 @section('title', 'Manajemen Periode Pre-Order')
 
 @section('content')
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+<section class="owner-dashboard-page" aria-labelledby="ownerPeriodsTitle">
+<header class="workspace-page-header">
     <div>
-        <h2 class="h4 fw-bold mb-1 font-heading">Manajemen Periode Pre-Order (PO)</h2>
-        <span class="text-muted small">Wewenang khusus Owner untuk membuat, membuka, dan menutup periode siklus pesanan (FR-04).</span>
+        <p class="owner-recap-eyebrow">OWNER / PERIODE PRE-ORDER</p>
+        <h1 id="ownerPeriodsTitle">Manajemen periode pre-order</h1>
+        <p>Wewenang khusus Owner untuk membuat, membuka, dan menutup periode siklus pesanan (FR-04).</p>
     </div>
     <div class="d-flex gap-2">
-        <a href="{{ route('owner.po-periods.create') }}" class="btn btn-mocha btn-sm">
-            <i class="bi bi-plus-lg me-1"></i> Buat Periode PO Baru
+        <a href="{{ route('owner.po-periods.create') }}" class="btn btn-dark">
+            <i class="bi bi-plus-lg" aria-hidden="true"></i> Buat Periode PO Baru
         </a>
     </div>
-</div>
+</header>
 
-<div class="card card-uyuy p-4">
+<div class="card card-uyuy p-3 p-md-4">
     <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-light small">
+        <table class="table owner-periods-table align-middle mb-0">
+            <thead>
                 <tr>
                     <th>Nama Periode</th>
                     <th>Tanggal Mulai</th>
@@ -33,28 +35,38 @@
                 @forelse($poPeriods as $period)
                     <tr>
                         <td>
-                            <strong class="text-dark fs-6">{{ $period->name }}</strong>
-                            <div class="text-muted small">ID: #{{ $period->id }} &bull; {{ $period->orders_count }} Pesanan Masuk</div>
+                            <strong>{{ $period->name }}</strong>
+                            <div class="text-muted small">ID #{{ $period->id }} · {{ $period->orders_count }} Pesanan Masuk</div>
                         </td>
                         <td>{{ $period->start_date->format('d M Y') }}</td>
                         <td>{{ $period->end_date->format('d M Y') }}</td>
-                        <td><x-status-badge :status="$period->status" /></td>
+                        <td>
+                            <x-status-badge :status="$period->status" />
+                            @if($period->isOrderableNow())
+                                <div class="small text-muted mt-1">Checkout aktif</div>
+                            @elseif($period->isOpen())
+                                <div class="small text-muted mt-1">Di luar rentang tanggal WIB</div>
+                            @endif
+                        </td>
                         <td class="small text-muted">{{ $period->notes ?? '-' }}</td>
-                        <td><span class="badge bg-light text-dark border">{{ $period->creator?->name ?? 'Owner' }}</span></td>
+                        <td><span class="badge-uyuy badge-po-closed">{{ $period->creator?->name ?? 'Owner' }}</span></td>
                         <td class="text-end">
-                            <div class="d-inline-flex gap-1 align-items-center">
-                                <a href="{{ route('owner.recap.index', ['po_period_id' => $period->id]) }}" class="btn btn-sm btn-outline-secondary" title="Lihat Rekapitulasi">
-                                    <i class="bi bi-clipboard-data"></i>
+                            <div class="d-inline-flex flex-wrap justify-content-end gap-1 align-items-center">
+                                <a href="{{ route('owner.po-periods.edit', $period->id) }}" class="btn btn-sm btn-outline-secondary" title="Edit periode">
+                                    <i class="bi bi-pencil-square me-1" aria-hidden="true"></i>Edit
+                                </a>
+                                <a href="{{ route('owner.recap.index', ['po_period_id' => $period->id]) }}" class="btn btn-sm btn-outline-secondary" title="Lihat Rekapitulasi" aria-label="Rekapitulasi {{ $period->name }}">
+                                    <i class="bi bi-clipboard-data" aria-hidden="true"></i>
                                 </a>
                                 <form action="{{ route('owner.po-periods.status.toggle', $period->id) }}" method="POST" class="d-inline">
                                     @csrf
                                     @if($period->isOpen())
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Tutup periode {{ $period->name }}? Pelanggan tidak akan bisa checkout lagi di batch ini.')">
-                                            <i class="bi bi-lock-fill me-1"></i> Tutup PO
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary" data-confirm="Tutup periode {{ $period->name }}? Pelanggan tidak akan bisa checkout lagi di batch ini.">
+                                            <i class="bi bi-lock me-1" aria-hidden="true"></i> Tutup PO
                                         </button>
                                     @else
-                                        <button type="submit" class="btn btn-sm btn-outline-success" onclick="return confirm('Buka periode {{ $period->name }}? Periode PO yang sedang buka lainnya akan otomatis ditutup.')">
-                                            <i class="bi bi-unlock-fill me-1"></i> Buka PO
+                                        <button type="submit" class="btn btn-sm btn-dark" data-confirm="Buka periode {{ $period->name }}? Periode PO yang sedang buka lainnya akan otomatis ditutup.">
+                                            <i class="bi bi-unlock me-1" aria-hidden="true"></i> Buka PO
                                         </button>
                                     @endif
                                 </form>
@@ -64,7 +76,7 @@
                 @empty
                     <tr>
                         <td colspan="7" class="text-center py-5 text-muted">
-                            <i class="bi bi-calendar-x fs-2 d-block mb-2"></i>
+                            <i class="bi bi-calendar-x fs-2 d-block mb-2" aria-hidden="true"></i>
                             Belum ada data periode pre-order. Silakan buat periode baru.
                         </td>
                     </tr>
@@ -79,4 +91,5 @@
         </div>
     @endif
 </div>
+</section>
 @endsection

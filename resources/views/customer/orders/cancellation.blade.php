@@ -1,82 +1,54 @@
 @extends('layouts.app')
 
-@section('title', 'Pengajuan Pembatalan Pesanan #' . $order->order_number)
+@section('title', 'Pengajuan Pembatalan #' . $order->order_number)
 
 @section('content')
-<!-- Header Banner -->
-<div class="py-4 border-bottom" style="background: radial-gradient(circle at 10% 20%, #FDFBF7 0%, #F4ECE3 90%); border-color: rgba(216, 197, 174, 0.4) !important;">
-    <div class="container">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-1 small">
-                <li class="breadcrumb-item"><a href="{{ route('home') }}" class="text-decoration-none" style="color: var(--color-mocha);">Beranda</a></li>
-                <li class="breadcrumb-item"><a href="{{ route('customer.dashboard') }}" class="text-decoration-none" style="color: var(--color-mocha);">Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="{{ route('customer.orders.index') }}" class="text-decoration-none" style="color: var(--color-mocha);">Pesanan Saya</a></li>
-                <li class="breadcrumb-item"><a href="{{ route('customer.orders.show', $order->id) }}" class="text-decoration-none" style="color: var(--color-mocha);">{{ $order->order_number }}</a></li>
-                <li class="breadcrumb-item active text-secondary" aria-current="page">Pengajuan Pembatalan</li>
-            </ol>
-        </nav>
-        <h1 class="h2 fw-bold font-heading mb-0 text-danger" style="letter-spacing: -0.02em;">
-            <i class="bi bi-x-octagon me-2"></i> Pengajuan Pembatalan Pesanan
-        </h1>
-    </div>
-</div>
+<div class="container py-5 customer-cancellation-page">
+    <nav aria-label="Breadcrumb" class="customer-checkout-breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ route('home') }}">Beranda</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('customer.dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('customer.orders.index') }}">Pesanan Saya</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('customer.orders.show', $order->id) }}">{{ $order->order_number }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Pembatalan</li>
+        </ol>
+    </nav>
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-7">
-            <x-card class="p-4 p-md-5 border-0 shadow">
-                <!-- Warning Notice -->
-                <div class="alert p-4 mb-4 rounded-4 small border-0 shadow-sm" style="background: rgba(245, 158, 11, 0.12); border-left: 4px solid #D97706 !important; line-height: 1.6;">
-                    <strong class="text-dark d-block mb-1"><i class="bi bi-shield-exclamation me-1" style="color: #D97706;"></i> Ketentuan Pembatalan Pesanan Uyuy Jastip:</strong>
-                    <ul class="mb-0 ps-3 text-secondary">
-                        <li>Pengajuan ini tidak membatalkan pesanan secara otomatis seketika.</li>
-                        <li>Permohonan Anda akan ditinjau dan diputuskan secara manual oleh staf <strong>Admin</strong>.</li>
-                        <li>Status pesanan tetap aktif hingga putusan resmi disetujui oleh Admin di sistem.</li>
-                    </ul>
+    <x-customer-portal-nav />
+
+    <header class="customer-cancellation-header">
+        <p class="home-eyebrow">Bantuan pesanan</p>
+        <h1>Ajukan pembatalan</h1>
+        <p>Admin akan meninjau permohonan ini dan memberi keputusan melalui status pesanan.</p>
+    </header>
+
+    <div class="customer-cancellation-layout">
+        <section class="customer-order-panel customer-cancellation-summary" aria-labelledby="customer-cancellation-order-heading">
+            <header class="customer-order-panel-header"><div><p class="home-eyebrow">Ringkasan transaksi</p><h2 id="customer-cancellation-order-heading">{{ $order->order_number }}</h2></div></header>
+            <dl>
+                <div><dt>Subtotal parfum</dt><dd>Rp {{ number_format($order->total_amount, 0, ',', '.') }}</dd></div>
+                <div><dt>Status saat ini</dt><dd><x-status-badge :status="$order->status" /></dd></div>
+            </dl>
+            <p>Pengajuan tidak membatalkan pesanan secara otomatis. Status tetap berjalan sampai Admin mengambil keputusan.</p>
+            <p>Jika pesanan telah dibayar, Admin wajib mencatat refund manual sebelum menyetujui pembatalan.</p>
+        </section>
+
+        <section class="customer-order-panel customer-cancellation-form-panel" aria-labelledby="customer-cancellation-form-heading">
+            <header class="customer-order-panel-header"><div><p class="home-eyebrow">Permohonan Anda</p><h2 id="customer-cancellation-form-heading">Alasan pembatalan</h2></div></header>
+            <form action="{{ route('customer.orders.cancellation.post', $order->id) }}" method="POST" class="customer-cancellation-form">
+                @csrf
+                <div class="customer-checkout-field">
+                    <label for="reason">Jelaskan alasan Anda <span aria-hidden="true">*</span></label>
+                    <textarea id="reason" name="reason" rows="6" required aria-invalid="{{ $errors->has('reason') ? 'true' : 'false' }}" aria-describedby="{{ $errors->has('reason') ? 'cancellation-reason-help cancellation-reason-error' : 'cancellation-reason-help' }}" placeholder="Tuliskan alasan yang membantu Admin meninjau permohonan Anda.">{{ old('reason') }}</textarea>
+                    <small id="cancellation-reason-help">Permohonan akan ditinjau oleh Admin. Pengiriman atau proses pesanan tidak langsung berubah setelah formulir dikirim.</small>
+                    @error('reason')<p class="customer-checkout-error" id="cancellation-reason-error">{{ $message }}</p>@enderror
                 </div>
-
-                <!-- Order Brief Bento -->
-                <div class="p-3 rounded-4 mb-4 small" style="background: #FAF8F5; border: 1.5px solid rgba(216, 197, 174, 0.45);">
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-secondary">Nomor Faktur:</span>
-                        <strong class="text-dark font-heading">{{ $order->order_number }}</strong>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-secondary">Total Tagihan:</span>
-                        <strong class="text-dark font-heading">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</strong>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-secondary">Status Saat Ini:</span>
-                        <x-status-badge :status="$order->status" />
-                    </div>
+                <div class="customer-cancellation-actions">
+                    <a href="{{ route('customer.orders.show', $order->id) }}">Kembali ke detail</a>
+                    <button type="submit">Kirim permohonan <span aria-hidden="true">→</span></button>
                 </div>
-
-                <form action="{{ route('customer.orders.cancellation.post', $order->id) }}" method="POST">
-                    @csrf
-
-                    <div class="mb-4">
-                        <label for="reason" class="form-label small fw-semibold text-secondary mb-1">
-                            Alasan Mengajukan Pembatalan <span class="text-danger">*</span>
-                        </label>
-                        <div class="input-group-uyuy p-1 @error('reason') border-danger @enderror">
-                            <textarea class="form-control border-0 bg-transparent shadow-none" id="reason" name="reason" rows="4" required placeholder="Tuliskan alasan jelas mengapa Anda ingin membatalkan pesanan ini (contoh: salah memilih ukuran ml, perubahan aroma, perubahan alamat pengiriman)...">{{ old('reason') }}</textarea>
-                        </div>
-                        @error('reason')
-                            <div class="text-danger small mt-1 ps-1" style="font-size: 0.82rem;">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-                        <a href="{{ route('customer.orders.show', $order->id) }}" class="btn btn-outline-secondary py-2 px-3">
-                            <i class="bi bi-arrow-left me-1"></i> Batal & Kembali
-                        </a>
-                        <button type="submit" class="btn btn-danger py-2 px-4 shadow-sm rounded-3">
-                            <i class="bi bi-send me-1"></i> Kirim Permohonan ke Admin
-                        </button>
-                    </div>
-                </form>
-            </x-card>
-        </div>
+            </form>
+        </section>
     </div>
 </div>
 @endsection

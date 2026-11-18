@@ -9,8 +9,8 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $activePo = PoPeriod::active()->first();
-        $featuredProducts = Product::active()->take(4)->get();
+        $activePo = PoPeriod::cachedActive();
+        $featuredProducts = Product::active()->with('variants')->take(4)->get();
 
         return view('pages.home', compact('activePo', 'featuredProducts'));
     }

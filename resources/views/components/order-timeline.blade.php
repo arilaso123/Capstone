@@ -17,10 +17,10 @@
 @endphp
 
 @if($status === 'Dibatalkan')
-    <div class="alert alert-danger d-flex align-items-center gap-3 my-3 card-uyuy border-danger">
-        <i class="bi bi-x-octagon-fill fs-2 text-danger"></i>
+    <div class="alert d-flex align-items-center gap-3 my-2 card-uyuy">
+        <i class="bi bi-x-octagon-fill fs-3" aria-hidden="true"></i>
         <div>
-            <h6 class="mb-0 fw-bold text-danger">Pesanan Dibatalkan</h6>
+            <h6 class="mb-0">Pesanan Dibatalkan</h6>
             <p class="small mb-0 text-muted">Pesanan ini telah resmi dibatalkan sesuai keputusan verifikasi admin.</p>
         </div>
     </div>

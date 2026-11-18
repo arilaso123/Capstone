@@ -3,151 +3,143 @@
 @section('title', 'Rekapitulasi Pesanan Pre-Order')
 
 @section('content')
-<!-- Header Banner -->
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom" style="border-color: rgba(216, 197, 174, 0.3) !important;">
-    <div>
-        <h2 class="h3 fw-bold font-heading mb-1 text-dark" style="letter-spacing: -0.02em;">Rekapitulasi Belanja Vendor In Parfume</h2>
-        <span class="text-secondary small">Wewenang khusus Owner untuk melihat konsolidasi daftar belanjaan parfum ke gerai In Parfume Bandung (FR-17).</span>
-    </div>
-    <div class="d-flex gap-2 mt-2 mt-sm-0">
-        <button type="button" class="btn btn-outline-secondary btn-sm py-2 px-3 rounded-3" onclick="window.print()">
-            <i class="bi bi-printer me-1"></i> Cetak Lembar Belanja
+<section class="owner-recap-page" aria-labelledby="ownerRecapTitle">
+    <header class="owner-recap-header">
+        <div>
+            <p class="owner-recap-eyebrow">OWNER / LAPORAN OPERASIONAL</p>
+            <h1 class="owner-recap-title" id="ownerRecapTitle">Rekapitulasi belanja PO</h1>
+            <p class="owner-recap-description">Konsolidasi kebutuhan parfum berdasarkan pesanan dengan pembayaran yang telah diverifikasi.</p>
+        </div>
+        <button type="button" class="btn btn-outline-secondary owner-recap-print" data-print-trigger>
+            <i class="bi bi-printer" aria-hidden="true"></i> Cetak rekap
         </button>
-    </div>
-</div>
+    </header>
 
-<!-- Period Filter Bento -->
-<x-card class="p-4 mb-4 border-0 shadow">
-    <form action="{{ route('owner.recap.index') }}" method="GET" id="recapFilterForm">
-        <div class="row g-3 align-items-center">
-            <div class="col-md-5">
-                <label class="form-label small fw-semibold text-secondary mb-1">Pilih Batch Periode Pre-Order:</label>
-                <select class="form-select form-control-uyuy" name="po_period_id" onchange="document.getElementById('recapFilterForm').submit()">
+    <section class="owner-recap-filter" aria-label="Filter periode pre-order">
+        <form action="{{ route('owner.recap.index') }}" method="GET" class="owner-recap-filter-form">
+            <div class="owner-recap-filter-control">
+                <label class="owner-recap-label" for="poPeriodSelect">Pilih periode PO</label>
+                <select class="form-select" name="po_period_id" id="poPeriodSelect" {{ $poPeriods->isEmpty() ? 'disabled' : '' }}>
                     @forelse($poPeriods as $period)
                         <option value="{{ $period->id }}" {{ $selectedPoPeriod && $selectedPoPeriod->id === $period->id ? 'selected' : '' }}>
-                            {{ $period->name }} ({{ $period->status }}: {{ $period->start_date->format('d M') }} - {{ $period->end_date->format('d M Y') }})
+                            {{ $period->name }} ({{ $period->start_date->format('d M Y') }} – {{ $period->end_date->format('d M Y') }})
                         </option>
                     @empty
                         <option value="">Belum ada periode PO</option>
                     @endforelse
                 </select>
             </div>
+            <button class="btn btn-outline-secondary owner-recap-filter-submit" type="submit" {{ $poPeriods->isEmpty() ? 'disabled' : '' }}>
+                Tampilkan rekap
+            </button>
             @if($selectedPoPeriod)
-                <div class="col-md-7 text-md-end pt-3">
-                    <span class="me-2"><x-status-badge :status="$selectedPoPeriod->status" /></span>
-                    <span class="text-secondary small">Total Pesanan Tercatat: <strong class="text-dark">{{ $summary['total_orders'] }} Transaksi</strong></span>
+                <div class="owner-recap-period-summary">
+                    <x-status-badge :status="$selectedPoPeriod->status" />
+                    <span>{{ $summary['total_orders'] }} pesanan dalam periode</span>
                 </div>
             @endif
-        </div>
-    </form>
-</x-card>
+        </form>
+    </section>
 
-@if($selectedPoPeriod)
-    <!-- Recap Summary Bento Grid -->
-    <div class="row g-4 mb-4">
-        <!-- Total Bottles -->
-        <div class="col-md-4">
-            <x-card class="p-4 border-0 shadow h-100">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="small fw-semibold text-secondary" style="font-size: 0.8rem;">Kebutuhan Belanja</span>
-                    <div class="p-2 rounded-3" style="background: var(--color-champagne-light); color: var(--color-mocha);">
-                        <i class="bi bi-boxes fs-5"></i>
-                    </div>
-                </div>
-                <h3 class="display-6 fw-bold font-heading text-dark mb-0">{{ $summary['total_items'] }} <span class="fs-5 fw-normal text-muted">Botol</span></h3>
-                <span class="small text-muted" style="font-size: 0.75rem;">Total botol harus dibeli</span>
-            </x-card>
-        </div>
-
-        <!-- Gross Value -->
-        <div class="col-md-4">
-            <x-card class="p-4 border-0 shadow h-100">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="small fw-semibold text-secondary" style="font-size: 0.8rem;">Total Omzet Valid</span>
-                    <div class="p-2 rounded-3" style="background: rgba(22, 163, 74, 0.12); color: #16A34A;">
-                        <i class="bi bi-cash-stack fs-5"></i>
-                    </div>
-                </div>
-                <h4 class="fw-bold font-heading text-dark mb-0 fs-3">Rp {{ number_format($summary['total_revenue'], 0, ',', '.') }}</h4>
-                <span class="small text-muted" style="font-size: 0.75rem;">Total nilai tagihan terkonfirmasi</span>
-            </x-card>
-        </div>
-
-        <!-- Total Customers -->
-        <div class="col-md-4">
-            <x-card class="p-4 border-0 shadow h-100">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="small fw-semibold text-secondary" style="font-size: 0.8rem;">Jumlah Pelanggan</span>
-                    <div class="p-2 rounded-3" style="background: rgba(3, 105, 161, 0.12); color: #0369A1;">
-                        <i class="bi bi-people fs-5"></i>
-                    </div>
-                </div>
-                <h3 class="display-6 fw-bold font-heading text-dark mb-0">{{ $summary['total_customers'] }} <span class="fs-5 fw-normal text-muted">Orang</span></h3>
-                <span class="small text-muted" style="font-size: 0.75rem;">Pelanggan aktif batch ini</span>
-            </x-card>
-        </div>
-    </div>
-
-    <!-- Aggregated Order List for Vendor In Parfume -->
-    <x-card class="p-4 p-md-5 border-0 shadow">
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom" style="border-color: rgba(216, 197, 174, 0.3) !important;">
+    @if($selectedPoPeriod)
+        <section class="owner-recap-period-heading" aria-label="Periode yang dipilih">
             <div>
-                <h5 class="fw-bold font-heading mb-1 text-dark">Daftar Rekapitulasi Pembelanjaan Botol Parfum</h5>
-                <span class="small text-secondary">Konsolidasi varian aroma & volume botol untuk pembelian di toko In Parfume Bandung.</span>
+                <p class="owner-recap-eyebrow">PERIODE TERPILIH</p>
+                <h2>{{ $selectedPoPeriod->name }}</h2>
             </div>
-            <span class="badge rounded-pill px-3 py-1" style="background: rgba(139, 107, 80, 0.12); color: var(--color-mocha);">
-                {{ count($recapData) }} Varian Terdaftar
-            </span>
-        </div>
+            <p>{{ $selectedPoPeriod->start_date->format('d M Y') }} – {{ $selectedPoPeriod->end_date->format('d M Y') }}</p>
+        </section>
 
-        <div class="table-responsive">
-            <table class="table align-middle mb-0">
-                <thead class="small" style="background: #FAF8F5; color: var(--color-charcoal);">
-                    <tr>
-                        <th class="border-0 rounded-start-3 py-3 text-center" style="width: 50px;">No.</th>
-                        <th class="border-0 py-3">Nama Varian Parfum</th>
-                        <th class="border-0 py-3">Kategori Aroma</th>
-                        <th class="border-0 py-3">Ukuran Botol</th>
-                        <th class="border-0 py-3 text-center">Total Kuantitas</th>
-                        <th class="border-0 rounded-end-3 py-3 text-end">Total Nilai Pre-Order</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($recapData as $index => $item)
-                        <tr style="border-bottom: 1px solid rgba(216, 197, 174, 0.25);">
-                            <td class="text-center py-3 text-muted small">{{ $index + 1 }}</td>
-                            <td class="py-3">
-                                <strong class="text-dark font-heading fs-6">{{ $item['product_name'] }}</strong>
-                            </td>
-                            <td class="py-3">
-                                <span class="badge rounded-pill px-2 py-1" style="background: rgba(45,36,30,0.06); color: var(--color-charcoal); font-size: 0.72rem;">
-                                    {{ $item['category'] }}
-                                </span>
-                            </td>
-                            <td class="py-3">
-                                <span class="badge rounded-pill px-3 py-1" style="background: #FAF8F5; border: 1px solid rgba(216, 197, 174, 0.5); color: var(--color-charcoal); font-size: 0.78rem;">
-                                    {{ $item['size_ml'] }} ml
-                                </span>
-                            </td>
-                            <td class="text-center py-3">
-                                <span class="badge rounded-pill px-3 py-1" style="background: rgba(139, 107, 80, 0.15); color: var(--color-mocha); font-size: 0.85rem; font-weight: 700;">
-                                    {{ $item['total_quantity'] }} Botol
-                                </span>
-                            </td>
-                            <td class="text-end py-3 fw-bold font-heading text-dark">
-                                Rp {{ number_format($item['total_subtotal'], 0, ',', '.') }}
-                            </td>
-                        </tr>
-                    @empty
+        <dl class="owner-recap-metrics" aria-label="Ringkasan periode PO">
+            <div class="owner-recap-metric">
+                <dt>Unit terverifikasi</dt>
+                <dd>{{ number_format($summary['total_items'], 0, ',', '.') }} <span>botol</span></dd>
+                <p>Dari pesanan dengan pembayaran valid.</p>
+            </div>
+            <div class="owner-recap-metric">
+                <dt>Modal tercatat</dt>
+                <dd>Rp {{ number_format($summary['total_cost'], 0, ',', '.') }}</dd>
+                <p>{{ number_format($summary['cost_tracked_items'], 0, ',', '.') }} dari {{ number_format($summary['total_items'], 0, ',', '.') }} botol memiliki data modal.</p>
+            </div>
+            <div class="owner-recap-metric">
+                <dt>Pembayaran valid</dt>
+                <dd>Rp {{ number_format($summary['total_revenue'], 0, ',', '.') }}</dd>
+                <p>Jumlah pembayaran yang telah diverifikasi.</p>
+            </div>
+            <div class="owner-recap-metric">
+                <dt>Pelanggan terverifikasi</dt>
+                <dd>{{ number_format($summary['total_customers'], 0, ',', '.') }} <span>pelanggan</span></dd>
+                <p>Memiliki pesanan dengan pembayaran valid.</p>
+            </div>
+            <div class="owner-recap-metric">
+                <dt>Menunggu pembayaran</dt>
+                <dd>{{ number_format($summary['unpaid_orders'], 0, ',', '.') }} <span>pesanan</span></dd>
+                <p>Belum masuk kebutuhan belanja terverifikasi.</p>
+            </div>
+        </dl>
+
+        <section class="owner-recap-table-section" aria-labelledby="ownerRecapTableTitle">
+            <header class="owner-recap-table-header">
+                <div>
+                    <p class="owner-recap-eyebrow">PENGADAAN PRODUK</p>
+                    <h2 id="ownerRecapTableTitle">Rincian varian parfum</h2>
+                    <p>Jumlah kebutuhan dan nilai pesanan dihitung dari item pada pesanan terverifikasi.</p>
+                </div>
+                <span class="owner-recap-variant-count">{{ number_format($recapData->count(), 0, ',', '.') }} varian</span>
+            </header>
+
+            <div class="table-responsive owner-recap-table-wrap">
+                <table class="table owner-recap-table align-middle mb-0">
+                    <caption class="visually-hidden">Rincian varian, jumlah botol, nilai pesanan, dan modal tercatat</caption>
+                    <thead>
                         <tr>
-                            <td colspan="6" class="text-center py-5 text-muted">
-                                Tidak ada item pesanan yang valid untuk periode ini.
-                            </td>
+                            <th scope="col" class="owner-recap-number">No.</th>
+                            <th scope="col">Nama produk</th>
+                            <th scope="col">Kategori aroma</th>
+                            <th scope="col">Ukuran</th>
+                            <th scope="col" class="text-end">Jumlah botol</th>
+                            <th scope="col" class="text-end">Nilai pesanan</th>
+                            <th scope="col" class="text-end">Modal tercatat</th>
                         </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @forelse($recapData as $index => $item)
+                            <tr>
+                                <td class="owner-recap-number">{{ $index + 1 }}</td>
+                                <td class="owner-recap-product-name">{{ $item['product_name'] }}</td>
+                                <td>{{ $item['category'] }}</td>
+                                <td>{{ $item['size_ml'] }} ml</td>
+                                <td class="text-end">{{ number_format($item['total_quantity'], 0, ',', '.') }} botol</td>
+                                <td class="text-end owner-recap-currency">Rp {{ number_format($item['total_subtotal'], 0, ',', '.') }}</td>
+                                <td class="text-end owner-recap-currency">
+                                    Rp {{ number_format($item['total_cost'], 0, ',', '.') }}
+                                    @if($item['cost_tracked_quantity'] < $item['total_quantity'])
+                                        <span class="owner-recap-table-note">Modal tercatat untuk {{ number_format($item['cost_tracked_quantity'], 0, ',', '.') }} dari {{ number_format($item['total_quantity'], 0, ',', '.') }} botol.</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7">
+                                    <div class="owner-recap-empty-row">
+                                        <i class="bi bi-inbox" aria-hidden="true"></i>
+                                        <strong>Belum ada pembayaran valid pada periode ini.</strong>
+                                        <span>Rincian belanja akan muncul setelah pembayaran pesanan diverifikasi.</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    @else
+        <div class="owner-recap-empty-state">
+            <i class="bi bi-calendar2-week" aria-hidden="true"></i>
+            <h2>Periode PO belum tersedia</h2>
+            <p>Buat periode PO untuk mulai melihat rekap belanja dan pembayaran.</p>
+            <a class="btn btn-dark" href="{{ route('owner.po-periods.create') }}">Buat periode PO</a>
         </div>
-    </x-card>
-@endif
+    @endif
+</section>
 @endsection

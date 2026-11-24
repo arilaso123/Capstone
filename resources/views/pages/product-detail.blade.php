@@ -163,5 +163,22 @@
             </section>
         </div>
     </div>
+
+    @if(isset($relatedProducts) && $relatedProducts->isNotEmpty())
+        <section class="related-products-section" aria-labelledby="relatedProductsTitle">
+            <header class="related-products-header">
+                <div>
+                    <p class="home-eyebrow">REKOMENDASI AROMA</p>
+                    <h2 id="relatedProductsTitle">Parfum serupa yang mungkin Anda suka</h2>
+                </div>
+                <a href="{{ route('catalog') }}" class="home-text-link">Lihat seluruh katalog <span aria-hidden="true">→</span></a>
+            </header>
+            <div class="product-grid">
+                @foreach($relatedProducts as $relatedProduct)
+                    <x-product-card :product="$relatedProduct" />
+                @endforeach
+            </div>
+        </section>
+    @endif
 </div>
 @endsection

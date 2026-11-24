@@ -21,7 +21,12 @@
             <h1>{{ $order->order_number }}</h1>
             <p>Dibuat {{ $order->created_at->copy()->timezone('Asia/Jakarta')->format('d F Y, H:i') }} WIB · Periode {{ $order->poPeriod?->name ?? 'PO Umum' }}</p>
         </div>
-        <x-status-badge :status="$order->status" />
+        <div class="customer-order-header-actions">
+            <x-status-badge :status="$order->status" />
+            <button type="button" class="btn btn-sm btn-outline-secondary no-print" data-print-trigger>
+                <i class="bi bi-printer me-1" aria-hidden="true"></i> Cetak faktur
+            </button>
+        </div>
     </header>
 
     <section class="customer-order-progress" aria-labelledby="customer-order-progress-heading">
@@ -66,7 +71,17 @@
                     @if($order->shipping_postal_code)<div><dt>Kode pos</dt><dd>{{ $order->shipping_postal_code }}</dd></div>@endif
                     @if($order->courier || $order->tracking_number || (float) $order->shipping_cost > 0)
                         <div><dt>Kurir</dt><dd>{{ $order->courier ?: 'Belum ditentukan' }}</dd></div>
-                        <div><dt>Nomor resi</dt><dd>{{ $order->tracking_number ?: 'Belum tersedia' }}</dd></div>
+                        <div>
+                            <dt>Nomor resi</dt>
+                            <dd>
+                                <span>{{ $order->tracking_number ?: 'Belum tersedia' }}</span>
+                                @if($order->tracking_number)
+                                    <button type="button" class="editorial-copy-btn no-print" data-copy-text="{{ $order->tracking_number }}" aria-label="Salin nomor resi">
+                                        Salin resi
+                                    </button>
+                                @endif
+                            </dd>
+                        </div>
                         <div><dt>Ongkos kirim</dt><dd>Rp {{ number_format((float) $order->shipping_cost, 0, ',', '.') }}</dd></div>
                     @endif
                     @if($order->customer_notes)<div class="customer-order-address"><dt>Catatan</dt><dd>{{ $order->customer_notes }}</dd></div>@endif

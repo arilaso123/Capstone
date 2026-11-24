@@ -2,7 +2,11 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#1e1e1a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Owner Dashboard') - Uyuy Jastip</title>
 
@@ -15,7 +19,15 @@
     <!-- Custom Uyuy Jastip Theme -->
     @stack('styles')
 </head>
-<body class="role-owner">
+@php
+    $isOwnerRoot = request()->routeIs('owner.dashboard');
+    $ownerBackFallback = match (true) {
+        request()->routeIs('owner.po-periods.create', 'owner.po-periods.edit') => route('owner.po-periods.index'),
+        request()->routeIs('owner.products.create', 'owner.products.edit') => route('owner.products.index'),
+        default => route('owner.dashboard'),
+    };
+@endphp
+<body class="role-owner" data-nav-root="{{ $isOwnerRoot ? 'true' : 'false' }}" data-nav-auth="{{ auth()->check() ? 'true' : 'false' }}">
 
     <!-- Top Navigation Bar for Owner -->
     <nav class="navbar navbar-expand-lg navbar-dark role-topbar sticky-top">
@@ -60,6 +72,12 @@
 
             <!-- Main Management Area -->
             <main class="col-lg-9 col-xl-10 p-4 main-content role-main">
+                @unless($isOwnerRoot)
+                    <div class="editorial-back-inline editorial-back-wrapper">
+                        <x-back-button :fallback="$ownerBackFallback" />
+                    </div>
+                @endunless
+
                 <x-flash-messages validation-title="Pemeriksaan data gagal:" />
 
                 @yield('content')

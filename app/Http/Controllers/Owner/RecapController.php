@@ -18,14 +18,88 @@ class RecapController extends Controller
         ]);
 
         $poPeriods = PoPeriod::withCount('orders')->latest()->get();
+        $selectedPoPeriod = $this->resolvePeriod($validated['po_period_id'] ?? null, $poPeriods);
 
-        $selectedPoPeriodId = $validated['po_period_id'] ?? null;
-        if ($selectedPoPeriodId) {
-            $selectedPoPeriod = PoPeriod::find($selectedPoPeriodId);
-        } else {
-            $selectedPoPeriod = PoPeriod::active()->first() ?? $poPeriods->first();
+        [$recapData, $summary] = $this->buildRecap($selectedPoPeriod);
+
+        return view('owner.recap.index', compact('poPeriods', 'selectedPoPeriod', 'recapData', 'summary'));
+    }
+
+    public function exportCsv(Request $request)
+    {
+        $validated = $request->validate([
+            'po_period_id' => ['nullable', 'integer', 'exists:po_periods,id'],
+        ]);
+
+        $poPeriods = PoPeriod::withCount('orders')->latest()->get();
+        $selectedPoPeriod = $this->resolvePeriod($validated['po_period_id'] ?? null, $poPeriods);
+
+        if (!$selectedPoPeriod) {
+            return redirect()->route('owner.recap.index')->with('warning', 'Tidak ada periode PO yang tersedia untuk diekspor.');
         }
 
+        [$recapData, $summary] = $this->buildRecap($selectedPoPeriod);
+
+        $safeSlug = trim((string) preg_replace('/[^A-Za-z0-9\-_]+/', '_', $selectedPoPeriod->name), '_');
+        if ($safeSlug === '') {
+            $safeSlug = 'PO_' . $selectedPoPeriod->id;
+        }
+        $filename = 'Rekap_Belanja_UyuyJastip_' . $safeSlug . '_' . now('Asia/Jakarta')->format('Ymd') . '.csv';
+
+        return response()->streamDownload(function () use ($selectedPoPeriod, $recapData, $summary) {
+            $handle = fopen('php://output', 'w');
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, ['REKAPITULASI BELANJA VENDOR IN PARFUME — UYUY JASTIP']);
+            fputcsv($handle, ['Periode PO', $this->sanitizeCsvCell($selectedPoPeriod->name)]);
+            fputcsv($handle, ['Jadwal Batch', $selectedPoPeriod->start_date->format('d M Y') . ' s.d. ' . $selectedPoPeriod->end_date->format('d M Y')]);
+            fputcsv($handle, ['Status PO', $this->sanitizeCsvCell($selectedPoPeriod->status)]);
+            fputcsv($handle, ['Diekspor Pada', now('Asia/Jakarta')->format('d M Y H:i') . ' WIB']);
+            fputcsv($handle, []);
+
+            fputcsv($handle, ['No', 'Nama Varian Parfum', 'Kategori Aroma', 'Ukuran (ml)', 'Unit Terverifikasi (Botol)', 'Modal Tercatat (Rp)', 'Nilai Pesanan Valid (Rp)']);
+
+            foreach ($recapData as $index => $item) {
+                fputcsv($handle, [
+                    $index + 1,
+                    $this->sanitizeCsvCell((string) $item['product_name']),
+                    $this->sanitizeCsvCell((string) $item['category']),
+                    $item['size_ml'],
+                    (int) $item['total_quantity'],
+                    (float) $item['total_cost'],
+                    (float) $item['total_subtotal'],
+                ]);
+            }
+
+            fputcsv($handle, []);
+            fputcsv($handle, ['', 'TOTAL KESELURUHAN', '', '', (int) $summary['total_items'], (float) $summary['total_cost'], (float) $summary['total_revenue']]);
+
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
+
+    private function sanitizeCsvCell(string $value): string
+    {
+        if ($value !== '' && in_array($value[0], ['=', '+', '-', '@', "\t", "\r"], true)) {
+            return "'" . $value;
+        }
+
+        return $value;
+    }
+
+    private function resolvePeriod(?int $selectedPoPeriodId, $poPeriods): ?PoPeriod
+    {
+        if ($selectedPoPeriodId) {
+            return PoPeriod::find($selectedPoPeriodId);
+        }
+
+        return PoPeriod::active()->first() ?? $poPeriods->first();
+    }
+
+    private function buildRecap(?PoPeriod $selectedPoPeriod): array
+    {
         $recapData = collect();
         $summary = [
             'total_orders' => 0,
@@ -44,7 +118,6 @@ class RecapController extends Controller
             $ordersQuery = Order::where('po_period_id', $selectedPoPeriod->id);
             $verifiedOrdersQuery = (clone $ordersQuery)
                 ->whereHas('payment', fn ($payments) => $payments->where('verification_status', Payment::STATUS_VALID));
-            $verifiedOrderIds = (clone $verifiedOrdersQuery)->select('orders.id');
 
             // Procurement quantities include only orders whose payment was manually verified.
             $recapData = DB::table('order_details')
@@ -83,6 +156,6 @@ class RecapController extends Controller
             $summary['cancelled_orders'] = (clone $ordersQuery)->where('status', Order::STATUS_CANCELLED)->count();
         }
 
-        return view('owner.recap.index', compact('poPeriods', 'selectedPoPeriod', 'recapData', 'summary'));
+        return [$recapData, $summary];
     }
 }

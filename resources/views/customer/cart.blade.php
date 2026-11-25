@@ -67,7 +67,7 @@
 
                 <div class="customer-cart-items">
                     @foreach($cart as $key => $item)
-                        <article class="customer-cart-item">
+                        <article class="customer-cart-item" data-unit-price="{{ (int) $item['price'] }}">
                             <div class="customer-cart-item-image" aria-hidden="true">
                                 @if(!empty($item['image_path']))
                                     <img src="{{ str_starts_with($item['image_path'], 'http') ? $item['image_path'] : asset('storage/' . $item['image_path']) }}" alt="" loading="lazy">
@@ -80,12 +80,16 @@
                                 <h3>{{ $item['name'] }}</h3>
                                 <p class="customer-cart-size">Ukuran {{ $item['size_ml'] }} ml</p>
                                 <div class="customer-cart-item-actions">
-                                    <form action="{{ route('customer.cart.update', $key) }}" method="POST" class="customer-cart-quantity-form">
+                                    <form action="{{ route('customer.cart.update', $key) }}" method="POST" class="customer-cart-quantity-form customer-cart-stepper-form">
                                         @csrf
                                         @method('PUT')
                                         <label for="quantity-{{ $loop->index }}">Jumlah</label>
-                                        <input id="quantity-{{ $loop->index }}" type="number" name="quantity" value="{{ $item['quantity'] }}" min="1" max="50" inputmode="numeric" aria-label="Jumlah {{ $item['name'] }} ukuran {{ $item['size_ml'] }} ml">
-                                        <button type="submit" class="customer-cart-update">Perbarui</button>
+                                        <div class="customer-cart-stepper">
+                                            <button type="button" class="customer-cart-stepper-btn" data-cart-step="minus" {{ $item['quantity'] <= 1 ? 'disabled' : '' }} aria-label="Kurangi jumlah {{ $item['name'] }}">−</button>
+                                            <input id="quantity-{{ $loop->index }}" class="customer-cart-stepper-input" type="number" name="quantity" value="{{ $item['quantity'] }}" min="1" max="50" inputmode="numeric" aria-label="Jumlah {{ $item['name'] }} ukuran {{ $item['size_ml'] }} ml">
+                                            <button type="button" class="customer-cart-stepper-btn" data-cart-step="plus" {{ $item['quantity'] >= 50 ? 'disabled' : '' }} aria-label="Tambah jumlah {{ $item['name'] }}">+</button>
+                                        </div>
+                                        <noscript><button type="submit" class="customer-cart-update">Perbarui</button></noscript>
                                     </form>
                                     <form action="{{ route('customer.cart.remove', $key) }}" method="POST" data-confirm="Hapus varian ini dari keranjang?">
                                         @csrf
@@ -95,7 +99,7 @@
                             </div>
                             <div class="customer-cart-item-price">
                                 <span>Rp {{ number_format($item['price'], 0, ',', '.') }} / botol</span>
-                                <strong>Rp {{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}</strong>
+                                <strong data-cart-item-subtotal>Rp {{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}</strong>
                             </div>
                         </article>
                     @endforeach
@@ -103,7 +107,7 @@
 
                 <footer class="customer-cart-total">
                     <span>Subtotal parfum</span>
-                    <strong>Rp {{ number_format($total, 0, ',', '.') }}</strong>
+                    <strong data-cart-grand-total>Rp {{ number_format($total, 0, ',', '.') }}</strong>
                 </footer>
             </section>
 
@@ -152,7 +156,7 @@
                 </section>
 
                 <section class="customer-checkout-summary" aria-label="Ringkasan tagihan">
-                    <div><span>Subtotal ({{ array_sum(array_column($cart, 'quantity')) }} botol)</span><strong>Rp {{ number_format($total, 0, ',', '.') }}</strong></div>
+                    <div><span>Subtotal (<span data-cart-total-bottles>{{ array_sum(array_column($cart, 'quantity')) }}</span> botol)</span><strong data-cart-grand-total>Rp {{ number_format($total, 0, ',', '.') }}</strong></div>
                     <div><span>Ongkos kirim</span><span>Dihitung dan dikonfirmasi terpisah</span></div>
                     <p>Jumlah di atas adalah subtotal parfum. Ongkos kirim belum termasuk dan akan dikonfirmasi saat pemrosesan pesanan.</p>
                 </section>

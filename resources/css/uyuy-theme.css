@@ -1136,11 +1136,14 @@ button:disabled, input[type="submit"]:disabled { cursor: not-allowed; }
     box-shadow: var(--shadow-card);
 }
 .product-detail-image {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
-    padding: clamp(1.5rem, 4vw, 3.25rem);
+    padding: clamp(1.25rem, 3.5vw, 2.5rem);
     object-fit: contain;
-    background: var(--color-surface-subtle);
+    object-position: center;
+    background: #ffffff;
 }
 .product-detail-image-placeholder {
     display: flex;
@@ -1751,8 +1754,18 @@ button:disabled, input[type="submit"]:disabled { cursor: not-allowed; }
     background: var(--color-surface-subtle);
     border-bottom: 1px solid var(--color-line);
 }
-.product-tile-image img { display: block; width: 100%; height: 100%; padding: 10%; object-fit: contain; transition: transform .25s ease; }
-.product-tile-image:hover img { transform: scale(1.03); }
+.product-tile-image img {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 8%;
+    object-fit: contain;
+    object-position: center;
+    background: #ffffff;
+}
+.product-tile-image:hover img { transform: none; }
 .product-tile-placeholder { display: grid; place-items: center; width: 100%; height: 100%; color: var(--color-muted); font-size: 2.25rem; }
 .product-tile-size {
     position: absolute;
@@ -2640,4 +2653,537 @@ button:disabled, input[type="submit"]:disabled { cursor: not-allowed; }
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
     .ui-submit-is-loading::after { animation: none; border-right-color: currentColor; }
+}
+
+/* ==========================================================================
+   EDITORIAL STONE v2 — EXTENDED UX ENHANCEMENTS
+   (Smart Back Navigation, Pagination, Cart Stepper, Countdown, Profile, Print)
+   ========================================================================== */
+
+/* Pure white surface on product tile image container */
+.product-tile-image,
+.product-detail-image-frame,
+.customer-cart-item-image,
+.owner-product-thumb,
+.owner-product-current-image {
+    background: #ffffff !important;
+}
+
+.customer-cart-item-image {
+    position: relative;
+}
+
+.customer-cart-item-image img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    padding: .35rem;
+    background: #ffffff;
+}
+
+/* Smart Editorial Back Button */
+.editorial-back-bar {
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-line);
+    padding: .55rem 0;
+}
+
+.editorial-back-inline {
+    margin-bottom: 1rem;
+}
+
+.editorial-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .36rem .85rem;
+    border-radius: var(--radius-button);
+    background: var(--color-surface);
+    color: var(--color-soot);
+    border: 1px solid var(--color-line-strong);
+    font-size: var(--text-meta);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.2;
+    cursor: pointer;
+    transition: background-color .18s ease, color .18s ease, border-color .18s ease, transform .18s ease;
+}
+
+.editorial-back-btn:hover,
+.editorial-back-btn:focus-visible {
+    background: var(--color-graphite);
+    color: var(--color-surface);
+    border-color: var(--color-graphite);
+    transform: translateX(-2px);
+}
+
+/* Editorial Indonesian Pagination */
+.editorial-pagination-wrapper {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .85rem 1.25rem;
+    padding-top: .5rem;
+}
+
+.editorial-pagination-info {
+    color: var(--color-muted);
+    font-size: var(--text-meta);
+}
+
+.editorial-pagination-info strong {
+    color: var(--color-soot);
+    font-weight: var(--font-weight-semibold);
+}
+
+.editorial-pagination-list {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.editorial-page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .3rem;
+    min-width: 38px;
+    height: 38px;
+    padding: 0 .75rem;
+    border-radius: var(--radius-button);
+    background: var(--color-surface);
+    color: var(--color-soot);
+    border: 1px solid var(--color-line-strong);
+    font-size: var(--text-meta);
+    font-weight: var(--font-weight-medium);
+    text-decoration: none;
+    transition: background-color .18s ease, color .18s ease, border-color .18s ease;
+}
+
+.editorial-page-btn.editorial-page-icon {
+    width: 38px;
+    padding: 0;
+}
+
+.editorial-page-btn:hover:not(.disabled):not(.active) {
+    background: var(--color-surface-subtle);
+    border-color: var(--color-graphite);
+    color: var(--color-soot);
+    text-decoration: none;
+}
+
+.editorial-page-btn.active {
+    background: var(--color-graphite);
+    border-color: var(--color-graphite);
+    color: var(--color-surface);
+    font-weight: var(--font-weight-semibold);
+    cursor: default;
+}
+
+.editorial-page-btn.disabled {
+    background: var(--color-surface-subtle);
+    border-color: var(--color-line);
+    color: rgba(82, 81, 75, .45);
+    cursor: not-allowed;
+}
+
+.editorial-page-dots {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 38px;
+    color: var(--color-muted);
+    font-size: var(--text-meta);
+}
+
+/* Cart Real-Time Stepper (Matches Editorial Product Quantity Control) */
+.customer-cart-stepper {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-button);
+    background: var(--color-surface);
+    overflow: hidden;
+}
+
+.customer-cart-stepper-btn {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: transparent;
+    color: var(--color-soot);
+    font-size: 1rem;
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    transition: background-color .15s ease, color .15s ease;
+}
+
+.customer-cart-stepper-btn:hover:not(:disabled) {
+    background: var(--color-surface-subtle);
+}
+
+.customer-cart-stepper-btn:disabled {
+    opacity: .38;
+    cursor: not-allowed;
+}
+
+.customer-cart-stepper-input {
+    width: 46px !important;
+    height: 34px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-left: 1px solid var(--color-line) !important;
+    border-right: 1px solid var(--color-line) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    text-align: center;
+    font-size: var(--text-label);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-soot);
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.customer-cart-stepper-input::-webkit-outer-spin-button,
+.customer-cart-stepper-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Live PO Countdown Pill */
+.po-countdown-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    margin-top: .55rem;
+    padding: .28rem .65rem;
+    border-radius: var(--radius-badge);
+    background: var(--color-accent-sage-bg);
+    color: var(--color-accent-sage);
+    border: 1px solid var(--color-accent-sage-border);
+    font-size: var(--text-micro);
+    font-weight: var(--font-weight-semibold);
+}
+
+/* Related Products Section on Product Detail */
+.related-products-section {
+    margin-top: 3.5rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid var(--color-line-strong);
+}
+
+.related-products-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.related-products-header h2 {
+    margin: .2rem 0 0;
+    color: var(--color-soot);
+    font-size: var(--text-subheading);
+    font-weight: var(--font-weight-semibold);
+}
+
+/* Inline Copy Button (Resi, Rekening) */
+.editorial-copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    margin-left: .45rem;
+    padding: .18rem .55rem;
+    border-radius: var(--radius-badge);
+    border: 1px solid var(--color-line-strong);
+    background: var(--color-surface);
+    color: var(--color-soot);
+    font-size: var(--text-micro);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+}
+
+.editorial-copy-btn:hover,
+.editorial-copy-btn.copied {
+    background: var(--color-graphite);
+    color: var(--color-surface);
+    border-color: var(--color-graphite);
+}
+
+/* Admin Payment Proof Inline Preview */
+.admin-proof-preview-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .9rem;
+    width: 100%;
+}
+
+.admin-proof-preview-img {
+    max-width: 100%;
+    max-height: 430px;
+    object-fit: contain;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-badge);
+    background: #ffffff;
+    cursor: zoom-in;
+}
+
+.admin-proof-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: .5rem;
+}
+
+/* Owner Recap Action Buttons Group */
+.owner-recap-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    align-items: center;
+}
+
+/* Customer Profile Page */
+.customer-profile-card {
+    max-width: 780px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    padding: clamp(1.35rem, 2.5vw, 2rem);
+}
+
+/* Customer Order Invoice Print Layout */
+.customer-order-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .65rem;
+}
+
+@media print {
+    .navbar-uyuy,
+    .editorial-back-bar,
+    .editorial-back-inline,
+    .customer-checkout-breadcrumb,
+    .customer-portal-nav,
+    .footer-uyuy,
+    .no-print {
+        display: none !important;
+    }
+
+    body {
+        background: #ffffff !important;
+    }
+
+    .customer-order-detail-page {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
+
+    .customer-order-panel,
+    .customer-order-progress {
+        box-shadow: none !important;
+        border: 1px solid #d4d2cc !important;
+        break-inside: avoid;
+    }
+}
+
+/* ==========================================================================
+   CROSS-DEVICE & CROSS-OS RESPONSIVE HARDENING
+   (iOS Safari, Android Chrome, macOS, Windows | Phone, Tablet, Laptop, PC)
+   ========================================================================== */
+
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    overflow-x: clip;
+    max-width: 100%;
+}
+
+body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: clip;
+    max-width: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* Eliminate 300ms tap delay & unintended double-tap zoom on iOS/Android */
+a, button, input, select, textarea, label {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Smooth momentum horizontal scroll for tables and touch navbars on iOS/Android */
+.table-responsive,
+.dashboard-sidebar,
+.customer-portal-nav {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+}
+
+/* Safe-area support for iOS Dynamic Island / Notch / Home Indicator & Android gesture bars */
+@supports (padding: env(safe-area-inset-bottom)) {
+    .navbar-uyuy,
+    .role-topbar,
+    .editorial-back-bar {
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+    }
+
+    .footer-uyuy {
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+        padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    }
+}
+
+/* Prevent iOS Safari forced auto-zoom when focusing inputs (<16px font-size) */
+@media (max-width: 991.98px) {
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]),
+    select,
+    textarea,
+    .form-control,
+    .form-select {
+        font-size: 16px !important;
+    }
+}
+
+/* Comfortable touch targets (Apple HIG & Material 3 >= 44px) on touch devices (iOS/Android) */
+@media (pointer: coarse) {
+    .editorial-back-btn,
+    .editorial-page-btn,
+    .customer-cart-stepper-btn,
+    .customer-cart-stepper-input,
+    .catalog-quick-filters a,
+    .editorial-copy-btn {
+        min-height: 44px;
+    }
+
+    .editorial-page-btn.editorial-page-icon {
+        width: 44px;
+    }
+
+    .customer-cart-stepper-btn {
+        width: 42px;
+        height: 44px;
+    }
+
+    .customer-cart-stepper-input {
+        height: 44px !important;
+    }
+}
+
+/* Responsive grid parity for Related Products across all viewports */
+.related-products-section .product-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 1199.98px) {
+    .related-products-section .product-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 767.98px) {
+    .related-products-section .product-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .editorial-pagination-wrapper {
+        justify-content: center;
+        text-align: center;
+    }
+
+    .owner-recap-actions,
+    .customer-order-header-actions {
+        width: 100%;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .catalog-filter-form > div,
+    .catalog-filter-form > .catalog-filter-search {
+        flex: 1 1 100%;
+    }
+
+    .catalog-filter-actions {
+        width: 100%;
+    }
+
+    .catalog-filter-actions .btn {
+        flex: 1 1 auto;
+    }
+
+    .customer-profile-card {
+        padding: 1.15rem;
+    }
+
+    .customer-cart-item-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .owner-recap-actions > *,
+    .admin-proof-actions > * {
+        flex: 1 1 auto;
+        justify-content: center;
+    }
+
+    .role-main {
+        padding: 1rem !important;
+    }
+
+    .role-topbar .navbar-brand {
+        font-size: 1rem;
+        gap: .4rem !important;
+    }
+
+    .role-topbar .role-topbar-badge {
+        font-size: .68rem;
+        padding: .2rem .5rem;
+    }
+}
+
+@media (max-width: 379.98px) {
+    .related-products-section .product-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .customer-cart-item {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .customer-cart-item-image {
+        width: 100%;
+        max-width: 140px;
+        margin-inline: auto;
+    }
+}
+
+/* Large & Ultra-Wide Desktop Monitors (macOS & Windows >= 1600px) */
+@media (min-width: 1600px) {
+    .container {
+        max-width: 1360px;
+    }
+
+    .role-shell.container-fluid {
+        max-width: 1840px;
+        margin-inline: auto;
+    }
 }

@@ -10,9 +10,16 @@
             <h1 class="owner-recap-title" id="ownerRecapTitle">Rekapitulasi belanja PO</h1>
             <p class="owner-recap-description">Konsolidasi kebutuhan parfum berdasarkan pesanan dengan pembayaran yang telah diverifikasi.</p>
         </div>
-        <button type="button" class="btn btn-outline-secondary owner-recap-print" data-print-trigger>
-            <i class="bi bi-printer" aria-hidden="true"></i> Cetak rekap
-        </button>
+        <div class="owner-recap-actions">
+            @if($selectedPoPeriod)
+                <a href="{{ route('owner.recap.export', ['po_period_id' => $selectedPoPeriod->id]) }}" class="btn btn-dark owner-recap-print">
+                    <i class="bi bi-file-earmark-spreadsheet" aria-hidden="true"></i> Unduh CSV
+                </a>
+            @endif
+            <button type="button" class="btn btn-outline-secondary owner-recap-print" data-print-trigger>
+                <i class="bi bi-printer" aria-hidden="true"></i> Cetak rekap
+            </button>
+        </div>
     </header>
 
     <section class="owner-recap-filter" aria-label="Filter periode pre-order">

@@ -14,6 +14,7 @@ use App\Http\Controllers\RefundProofController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\Customer\CartController as CustomerCartController;
 use App\Http\Controllers\Customer\OrderController as CustomerOrderController;
+use App\Http\Controllers\Customer\ProfileController as CustomerProfileController;
 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
@@ -75,6 +76,8 @@ Route::get('/pembatalan/{cancellation}/bukti-refund', [RefundProofController::cl
 // ==========================================
 Route::prefix('pelanggan')->middleware(['auth', 'role:customer'])->group(function () {
     Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('customer.dashboard');
+    Route::get('/profil', [CustomerProfileController::class, 'edit'])->name('customer.profile.edit');
+    Route::put('/profil', [CustomerProfileController::class, 'update'])->name('customer.profile.update');
 
     // Cart & Checkout
     Route::get('/keranjang', [CustomerCartController::class, 'index'])->name('customer.cart');
@@ -144,5 +147,6 @@ Route::prefix('owner')->middleware(['auth', 'role:owner'])->group(function () {
 
     // Business Recap & Customers
     Route::get('/rekapitulasi', [OwnerRecapController::class, 'index'])->name('owner.recap.index');
+    Route::get('/rekapitulasi/export', [OwnerRecapController::class, 'exportCsv'])->name('owner.recap.export');
     Route::get('/pelanggan', [OwnerCustomerController::class, 'index'])->name('owner.customers.index');
 });

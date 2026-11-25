@@ -27,6 +27,11 @@
                         <x-status-badge :status="$activePo->isOrderableNow() ? 'Dibuka' : 'Ditutup'" />
                     </div>
                     <p class="home-period-date">{{ $activePo->start_date->format('d M Y') }} – {{ $activePo->end_date->format('d M Y') }}</p>
+                    @if($activePo->isOrderableNow())
+                        <span class="po-countdown-pill" data-po-countdown data-po-end="{{ $activePo->end_date->format('Y-m-d') }}T23:59:59+07:00">
+                            <i class="bi bi-clock" aria-hidden="true"></i> Menghitung sisa waktu…
+                        </span>
+                    @endif
                     <p class="home-period-note">
                         {{ $activePo->isOrderableNow() ? 'Pemesanan tersedia dalam rentang tanggal PO WIB.' : 'Checkout belum tersedia di luar rentang tanggal PO WIB.' }}
                     </p>

@@ -35,11 +35,12 @@
             <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
                 @auth
                     @if(auth()->user()->role === 'customer')
+                        @php($navCartBottles = is_array(session('cart')) ? array_sum(array_column(session('cart'), 'quantity')) : 0)
                         <li class="nav-item">
-                            <a class="nav-link position-relative" href="{{ route('customer.cart') }}" title="Keranjang Belanja" aria-label="Keranjang Belanja, {{ session('cart') ? count(session('cart')) : 0 }} produk">
+                            <a class="nav-link position-relative" href="{{ route('customer.cart') }}" title="Keranjang Belanja" aria-label="Keranjang Belanja, {{ $navCartBottles }} botol">
                                 <i class="bi bi-bag fs-5"></i>
-                                <span class="position-absolute top-1 start-100 translate-middle badge rounded-pill cart-count-badge">
-                                    {{ session('cart') ? count(session('cart')) : 0 }}
+                                <span id="navbarCartBadge" class="position-absolute top-1 start-100 translate-middle badge rounded-pill cart-count-badge">
+                                    {{ $navCartBottles }}
                                 </span>
                             </a>
                         </li>
@@ -51,6 +52,7 @@
                             <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
                                 <li><a class="dropdown-item" href="{{ route('customer.dashboard') }}"><i class="bi bi-speedometer2 me-2"></i> Dashboard Saya</a></li>
                                 <li><a class="dropdown-item" href="{{ route('customer.orders.index') }}"><i class="bi bi-receipt me-2"></i> Riwayat Pesanan</a></li>
+                                <li><a class="dropdown-item" href="{{ route('customer.profile.edit') }}"><i class="bi bi-person me-2"></i> Profil &amp; Alamat</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form action="{{ route('logout') }}" method="POST">

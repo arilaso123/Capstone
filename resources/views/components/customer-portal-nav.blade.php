@@ -1,4 +1,4 @@
-@php($cartCount = session('cart') ? count(session('cart')) : 0)
+@php($cartCount = is_array(session('cart')) ? array_sum(array_column(session('cart'), 'quantity')) : 0)
 
 <nav class="customer-portal-nav" aria-label="Navigasi Portal Pelanggan">
     <a href="{{ route('customer.dashboard') }}" @class(['active' => request()->routeIs('customer.dashboard')]) @if(request()->routeIs('customer.dashboard')) aria-current="page" @endif>
@@ -11,7 +11,11 @@
     </a>
     <a href="{{ route('customer.cart') }}" @class(['active' => request()->routeIs('customer.cart')]) @if(request()->routeIs('customer.cart')) aria-current="page" @endif>
         <i class="bi bi-bag" aria-hidden="true"></i>
-        <span>Keranjang ({{ $cartCount }})</span>
+        <span>Keranjang (<span data-cart-total-bottles>{{ $cartCount }}</span>)</span>
+    </a>
+    <a href="{{ route('customer.profile.edit') }}" @class(['active' => request()->routeIs('customer.profile*')]) @if(request()->routeIs('customer.profile*')) aria-current="page" @endif>
+        <i class="bi bi-person" aria-hidden="true"></i>
+        <span>Profil &amp; alamat</span>
     </a>
     <a href="{{ route('catalog') }}">
         <i class="bi bi-grid" aria-hidden="true"></i>

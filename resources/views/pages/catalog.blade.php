@@ -28,6 +28,9 @@
                 <x-status-badge status="Dibuka" />
                 <strong>{{ $activePo->name }}</strong>
                 <span>{{ $activePo->start_date->format('d M Y') }} – {{ $activePo->end_date->format('d M Y') }}</span>
+                <span class="po-countdown-pill" data-po-countdown data-po-end="{{ $activePo->end_date->format('Y-m-d') }}T23:59:59+07:00">
+                    <i class="bi bi-clock" aria-hidden="true"></i> Menghitung sisa waktu…
+                </span>
             @else
                 <x-status-badge status="Ditutup" />
                 @if($activePo)
@@ -68,9 +71,18 @@
                     <option value="100" {{ request('size_ml') == '100' ? 'selected' : '' }}>100 ml</option>
                 </select>
             </div>
+            <div>
+                <label for="catalogSort">Urutkan</label>
+                <select id="catalogSort" name="sort" class="form-select">
+                    <option value="latest" {{ ($sort ?? request('sort', 'latest')) === 'latest' ? 'selected' : '' }}>Terbaru</option>
+                    <option value="price_asc" {{ ($sort ?? request('sort')) === 'price_asc' ? 'selected' : '' }}>Harga terendah</option>
+                    <option value="price_desc" {{ ($sort ?? request('sort')) === 'price_desc' ? 'selected' : '' }}>Harga tertinggi</option>
+                    <option value="name_asc" {{ ($sort ?? request('sort')) === 'name_asc' ? 'selected' : '' }}>Nama A–Z</option>
+                </select>
+            </div>
             <div class="catalog-filter-actions">
                 <button type="submit" class="btn btn-dark">Terapkan filter</button>
-                @if(request('search') || request('category') || request('size_ml'))
+                @if(request('search') || request('category') || request('size_ml') || (request('sort') && request('sort') !== 'latest'))
                     <a href="{{ route('catalog') }}" class="btn btn-outline-secondary">Reset</a>
                 @endif
             </div>

@@ -352,11 +352,280 @@ const initRefundRequirementToggle = () => {
     syncRefundRequirement();
 };
 
+const initSmartBackNavigation = () => {
+    const STACK_KEY = 'uyuy_nav_stack';
+    const GOING_BACK_KEY = 'uyuy_nav_going_back';
+    const isRoot = document.body?.dataset.navRoot === 'true';
+    const isAuth = document.body?.dataset.navAuth === 'true';
+    const currentUrl = window.location.pathname + window.location.search;
+
+    const isBlockedForAuth = (url) => {
+        if (!isAuth || !url) return false;
+        const path = url.split('?')[0];
+        return path === '/login' || path === '/register' || path === '/forgot-password' || path.startsWith('/reset-password');
+    };
+
+    const normalizePath = (url) => {
+        if (!url) return '';
+        try {
+            const parsed = new URL(url, window.location.origin);
+            return parsed.pathname + parsed.search;
+        } catch {
+            return url;
+        }
+    };
+
+    const readStack = () => {
+        try {
+            const raw = sessionStorage.getItem(STACK_KEY);
+            const arr = raw ? JSON.parse(raw) : [];
+            if (!Array.isArray(arr)) return [];
+            return arr.filter((item) => typeof item === 'string' && item.length > 0 && !isBlockedForAuth(item));
+        } catch {
+            return [];
+        }
+    };
+
+    const writeStack = (arr) => {
+        try {
+            sessionStorage.setItem(STACK_KEY, JSON.stringify(arr.slice(-30)));
+        } catch {}
+    };
+
+    let stack = readStack();
+    let goingBack = false;
+    try {
+        goingBack = sessionStorage.getItem(GOING_BACK_KEY) === '1';
+        sessionStorage.removeItem(GOING_BACK_KEY);
+    } catch {}
+
+    if (isRoot) {
+        stack = [currentUrl];
+    } else if (goingBack) {
+        const backIdx = stack.lastIndexOf(currentUrl);
+        stack = backIdx !== -1 ? stack.slice(0, backIdx + 1) : [...stack, currentUrl];
+    } else {
+        const existingIdx = stack.lastIndexOf(currentUrl);
+        stack = existingIdx !== -1 ? stack.slice(0, existingIdx + 1) : [...stack, currentUrl];
+    }
+    writeStack(stack);
+
+    const resolveTarget = (fallbackAttr) => {
+        const currentStack = readStack();
+        for (let i = currentStack.length - 1; i >= 0; i--) {
+            if (currentStack[i] !== currentUrl && !isBlockedForAuth(currentStack[i])) {
+                return { url: currentStack[i], stackIndex: i };
+            }
+        }
+        const fallbackPath = normalizePath(fallbackAttr);
+        if (fallbackPath && fallbackPath !== currentUrl && !isBlockedForAuth(fallbackPath)) {
+            return { url: fallbackPath, stackIndex: -1 };
+        }
+        return null;
+    };
+
+    document.querySelectorAll('.editorial-back-btn').forEach((btn) => {
+        if (!(btn instanceof HTMLButtonElement)) return;
+        const fallback = btn.dataset.fallbackUrl || '';
+        const target = resolveTarget(fallback);
+
+        if (isRoot || !target) {
+            const wrapper = btn.closest('.editorial-back-wrapper');
+            if (wrapper instanceof HTMLElement) {
+                wrapper.hidden = true;
+            } else {
+                btn.hidden = true;
+            }
+            return;
+        }
+
+        btn.addEventListener('click', () => {
+            const latestTarget = resolveTarget(fallback);
+            if (!latestTarget) return;
+            if (latestTarget.stackIndex >= 0) {
+                writeStack(readStack().slice(0, latestTarget.stackIndex + 1));
+            }
+            try {
+                sessionStorage.setItem(GOING_BACK_KEY, '1');
+            } catch {}
+            window.location.href = latestTarget.url;
+        });
+    });
+};
+
+const initRealTimeCartStepper = () => {
+    const forms = document.querySelectorAll('.customer-cart-stepper-form');
+    if (!forms.length) return;
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    const formatIdr = (amount) => 'Rp ' + Number(amount).toLocaleString('id-ID');
+
+    const recalcUI = () => {
+        let grandTotal = 0;
+        let totalBottles = 0;
+
+        document.querySelectorAll('.customer-cart-item[data-unit-price]').forEach((itemEl) => {
+            const unitPrice = parseInt(itemEl.dataset.unitPrice || '0', 10) || 0;
+            const input = itemEl.querySelector('.customer-cart-stepper-input');
+            const minus = itemEl.querySelector('[data-cart-step="minus"]');
+            const plus = itemEl.querySelector('[data-cart-step="plus"]');
+            const subtotalEl = itemEl.querySelector('[data-cart-item-subtotal]');
+
+            let qty = parseInt(input instanceof HTMLInputElement ? input.value : '1', 10) || 1;
+            qty = Math.max(1, Math.min(50, qty));
+
+            const itemSubtotal = unitPrice * qty;
+            grandTotal += itemSubtotal;
+            totalBottles += qty;
+
+            if (subtotalEl) subtotalEl.textContent = formatIdr(itemSubtotal);
+            if (minus instanceof HTMLButtonElement) minus.disabled = qty <= 1;
+            if (plus instanceof HTMLButtonElement) plus.disabled = qty >= 50;
+        });
+
+        document.querySelectorAll('[data-cart-grand-total]').forEach((el) => {
+            el.textContent = formatIdr(grandTotal);
+        });
+        document.querySelectorAll('[data-cart-total-bottles]').forEach((el) => {
+            el.textContent = String(totalBottles);
+        });
+        const navBadge = document.getElementById('navbarCartBadge');
+        if (navBadge) navBadge.textContent = String(totalBottles);
+    };
+
+    const syncToServer = async (form, qty) => {
+        if (!window.fetch || !csrfToken) {
+            form.submit();
+            return;
+        }
+
+        const payload = new URLSearchParams();
+        payload.append('_method', 'PUT');
+        payload.append('_token', csrfToken);
+        payload.append('quantity', String(qty));
+
+        try {
+            const res = await fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                },
+                body: payload.toString(),
+            });
+            if (!res.ok) throw new Error('Update failed');
+            const data = await res.json();
+            if (data && data.checkout_token) {
+                const tokenInput = document.querySelector('input[name="checkout_token"]');
+                if (tokenInput instanceof HTMLInputElement) {
+                    tokenInput.value = data.checkout_token;
+                }
+            }
+        } catch {
+            form.submit();
+        }
+    };
+
+    forms.forEach((form) => {
+        if (!(form instanceof HTMLFormElement)) return;
+        const input = form.querySelector('.customer-cart-stepper-input');
+        const minus = form.querySelector('[data-cart-step="minus"]');
+        const plus = form.querySelector('[data-cart-step="plus"]');
+        if (!(input instanceof HTMLInputElement)) return;
+
+        minus?.addEventListener('click', () => {
+            const current = parseInt(input.value, 10) || 1;
+            if (current > 1) {
+                input.value = String(current - 1);
+                recalcUI();
+                syncToServer(form, current - 1);
+            }
+        });
+
+        plus?.addEventListener('click', () => {
+            const current = parseInt(input.value, 10) || 1;
+            if (current < 50) {
+                input.value = String(current + 1);
+                recalcUI();
+                syncToServer(form, current + 1);
+            }
+        });
+
+        input.addEventListener('input', recalcUI);
+        input.addEventListener('change', () => {
+            const clamped = Math.max(1, Math.min(50, parseInt(input.value, 10) || 1));
+            input.value = String(clamped);
+            recalcUI();
+            syncToServer(form, clamped);
+        });
+    });
+};
+
+const initCopyTextButtons = () => {
+    document.addEventListener('click', async (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+        const btn = target.closest('[data-copy-text]');
+        if (!(btn instanceof HTMLElement)) return;
+
+        const text = btn.dataset.copyText || '';
+        if (!text) return;
+
+        try {
+            await navigator.clipboard.writeText(text);
+            const original = btn.dataset.originalLabel || btn.textContent || 'Salin';
+            btn.dataset.originalLabel = original;
+            btn.classList.add('copied');
+            btn.textContent = 'Tersalin ✓';
+            setTimeout(() => {
+                btn.classList.remove('copied');
+                btn.textContent = original;
+            }, 2000);
+        } catch {}
+    });
+};
+
+const initPoCountdown = () => {
+    const nodes = document.querySelectorAll('[data-po-countdown][data-po-end]');
+    if (!nodes.length) return;
+
+    const updateAll = () => {
+        const now = Date.now();
+        nodes.forEach((node) => {
+            if (!(node instanceof HTMLElement)) return;
+            const endTs = Date.parse(node.dataset.poEnd || '');
+            if (Number.isNaN(endTs)) return;
+            const diff = endTs - now;
+            if (diff <= 0) {
+                node.textContent = 'Batas pemesanan telah berakhir';
+                return;
+            }
+            const days = Math.floor(diff / 86400000);
+            const hours = Math.floor((diff % 86400000) / 3600000);
+            const mins = Math.floor((diff % 3600000) / 60000);
+            const parts = [];
+            if (days > 0) parts.push(`${days} hari`);
+            parts.push(`${hours} jam`);
+            if (days === 0) parts.push(`${mins} menit`);
+            node.textContent = `Ditutup dalam ${parts.join(' ')}`;
+        });
+    };
+
+    updateAll();
+    window.setInterval(updateAll, 30000);
+};
+
 const initPageBehaviors = () => {
     document.querySelectorAll(filledFieldSelector).forEach(syncFilledFieldState);
     initProductDetailPricing();
     initPaymentProofPreview();
     initRefundRequirementToggle();
+    initSmartBackNavigation();
+    initRealTimeCartStepper();
+    initCopyTextButtons();
+    initPoCountdown();
     initWordReveal();
 };
 

@@ -160,12 +160,34 @@ class CartController extends Controller
         $validated = $request->validate(['quantity' => ['required', 'integer', 'min:1', 'max:50']]);
         $cart = session()->get('cart', []);
         if (!is_array($cart) || !isset($cart[$key]) || !is_array($cart[$key])) {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Item keranjang tidak ditemukan.'], 404);
+            }
             return redirect()->route('customer.cart')->with('warning', 'Item keranjang tidak ditemukan. Muat ulang halaman.');
         }
 
         $cart[$key]['quantity'] = (int) $validated['quantity'];
         session()->put('cart', $cart);
         $this->rotateCheckoutToken();
+
+        if ($request->expectsJson()) {
+            $itemSubtotal = (float) ($cart[$key]['price'] ?? 0) * $cart[$key]['quantity'];
+            $total = 0;
+            $totalBottles = 0;
+            foreach ($cart as $item) {
+                $total += (float) ($item['price'] ?? 0) * (int) ($item['quantity'] ?? 0);
+                $totalBottles += (int) ($item['quantity'] ?? 0);
+            }
+
+            return response()->json([
+                'success' => true,
+                'quantity' => $cart[$key]['quantity'],
+                'item_subtotal' => $itemSubtotal,
+                'total' => $total,
+                'total_bottles' => $totalBottles,
+                'checkout_token' => session('checkout_token'),
+            ]);
+        }
 
         return redirect()->route('customer.cart')->with('success', 'Jumlah item keranjang berhasil diperbarui.');
     }

@@ -34,9 +34,61 @@
 
                 <div class="admin-review-proof-frame">
                     @if($payment->proof_file_path && !str_starts_with($payment->proof_file_path, 'http'))
-                        <a href="{{ route('payments.proof', $payment) }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary">
-                            <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Buka bukti secara aman
-                        </a>
+                        @php($isPdfProof = str_ends_with(strtolower($payment->proof_file_path), '.pdf'))
+                        @if($isPdfProof)
+                            <div class="admin-proof-preview-wrap">
+                                <i class="bi bi-file-earmark-pdf fs-1 text-danger" aria-hidden="true"></i>
+                                <a href="{{ route('payments.proof', $payment) }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary">
+                                    <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Buka berkas PDF secara aman
+                                </a>
+                            </div>
+                        @else
+                            <div class="admin-proof-preview-wrap">
+                                <img
+                                    src="{{ route('payments.proof', $payment) }}"
+                                    alt="Bukti pembayaran pesanan {{ $payment->order?->order_number ?? '' }}"
+                                    class="admin-proof-preview-img"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#proofZoomModal"
+                                    title="Klik untuk memperbesar bukti transfer"
+                                >
+                                <div class="admin-proof-actions">
+                                    <button type="button" class="btn btn-sm btn-dark" data-bs-toggle="modal" data-bs-target="#proofZoomModal">
+                                        <i class="bi bi-zoom-in" aria-hidden="true"></i> Perbesar gambar
+                                    </button>
+                                    <a href="{{ route('payments.proof', $payment) }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Buka tab baru
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Modal Zoom Bukti Transfer (Editorial Stone) -->
+                            <div class="modal fade" id="proofZoomModal" tabindex="-1" aria-labelledby="proofZoomModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-xl">
+                                    <div class="modal-content border-0 shadow-lg overflow-hidden">
+                                        <div class="modal-header" style="background: var(--color-soot); color: var(--color-surface);">
+                                            <h6 class="modal-title mb-0" id="proofZoomModalLabel" style="color: var(--color-surface);">
+                                                Pratinjau Bukti Pembayaran — {{ $payment->order?->order_number ?? '' }}
+                                            </h6>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                                        </div>
+                                        <div class="modal-body text-center p-4" style="background: var(--color-surface-subtle);">
+                                            <img src="{{ route('payments.proof', $payment) }}" alt="Bukti pembayaran ukuran penuh" class="img-fluid" style="max-height: 78vh; object-fit: contain; background: #ffffff; border: 1px solid var(--color-line);">
+                                        </div>
+                                        <div class="modal-footer justify-content-between" style="background: var(--color-surface);">
+                                            <span class="small" style="color: var(--color-muted);">
+                                                Tagihan: <strong style="color: var(--color-soot);">Rp {{ number_format($payment->order?->total_amount ?? 0, 0, ',', '.') }}</strong>
+                                                &bull; Dilaporkan: <strong style="color: var(--color-soot);">Rp {{ number_format($payment->amount, 0, ',', '.') }}</strong>
+                                            </span>
+                                            <div class="d-flex gap-2">
+                                                <a href="{{ route('payments.proof', $payment) }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-secondary">Buka resolusi asli</a>
+                                                <button type="button" class="btn btn-sm btn-dark" data-bs-dismiss="modal">Tutup</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                     @elseif($payment->proof_file_path)
                         <div class="admin-review-proof-message" role="status">
                             <i class="bi bi-shield-exclamation" aria-hidden="true"></i>

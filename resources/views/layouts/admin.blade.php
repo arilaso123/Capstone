@@ -2,7 +2,11 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#1e1e1a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin Operasional') - Uyuy Jastip</title>
 
@@ -15,7 +19,16 @@
     <!-- Custom Uyuy Jastip Theme -->
     @stack('styles')
 </head>
-<body class="role-admin">
+@php
+    $isAdminRoot = request()->routeIs('admin.dashboard');
+    $adminBackFallback = match (true) {
+        request()->routeIs('admin.orders.show') => route('admin.orders.index'),
+        request()->routeIs('admin.payments.verify') => route('admin.payments.index'),
+        request()->routeIs('admin.cancellations.show') => route('admin.cancellations.index'),
+        default => route('admin.dashboard'),
+    };
+@endphp
+<body class="role-admin" data-nav-root="{{ $isAdminRoot ? 'true' : 'false' }}" data-nav-auth="{{ auth()->check() ? 'true' : 'false' }}">
 
     <!-- Top Navigation Bar for Admin -->
     <nav class="navbar navbar-expand-lg navbar-dark role-topbar sticky-top">
@@ -62,6 +75,12 @@
 
             <!-- Main Operational Area -->
             <main class="col-lg-9 col-xl-10 p-4 main-content role-main">
+                @unless($isAdminRoot)
+                    <div class="editorial-back-inline editorial-back-wrapper">
+                        <x-back-button :fallback="$adminBackFallback" />
+                    </div>
+                @endunless
+
                 <x-flash-messages validation-title="Pemeriksaan data gagal:" />
 
                 @yield('content')

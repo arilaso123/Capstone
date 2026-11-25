@@ -15,7 +15,7 @@
     <header class="catalog-header">
         <div>
             <p class="home-eyebrow">KOLEKSI PARFUM</p>
-            <h1>Katalog parfum</h1>
+            <h1 data-animate="words">Katalog parfum</h1>
             <p>Jelajahi produk, kategori aroma, dan ukuran botol yang tersedia.</p>
         </div>
         <a href="{{ route('po.info') }}" class="catalog-po-link">Cara kerja pre-order <span aria-hidden="true">→</span></a>
@@ -88,7 +88,7 @@
     </section>
 
     <div class="catalog-results-heading">
-        <h2>Produk parfum</h2>
+        <h2 data-animate="words">Produk parfum</h2>
         <span>{{ number_format($products->total(), 0, ',', '.') }} produk</span>
     </div>
 

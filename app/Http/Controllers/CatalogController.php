@@ -37,7 +37,7 @@ class CatalogController extends Controller
             $query->whereHas('variants', fn ($variants) => $variants->where('size_ml', $validated['size_ml']));
         }
 
-        $products = $query->with('variants')->latest()->paginate(8)->withQueryString();
+        $products = $query->with('variants')->orderBy('id', 'asc')->paginate(8)->withQueryString();
 
         return view('pages.catalog', compact('activePo', 'products'));
     }

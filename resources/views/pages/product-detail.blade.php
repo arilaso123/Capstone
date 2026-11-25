@@ -154,7 +154,7 @@
                 @endif
 
                 <section class="product-detail-description" aria-labelledby="productDescriptionTitle">
-                    <h2 id="productDescriptionTitle">Tentang produk</h2>
+                    <h2 id="productDescriptionTitle" data-animate="words">Tentang produk</h2>
                     <p>{{ $product->description ?: 'Informasi aroma untuk produk ini belum tersedia.' }}</p>
                     @if($product->category)
                         <p class="product-detail-description-category"><span>Kategori aroma</span>{{ $product->category }}</p>

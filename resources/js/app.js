@@ -1,4 +1,5 @@
 import './bootstrap';
+import { initWordReveal } from './animations/wordReveal';
 
 const filledFieldSelector = 'input:not([type="hidden"]):not([type="submit"]):not([type="reset"]):not([type="button"]):not([type="image"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]), select, textarea';
 
@@ -356,6 +357,7 @@ const initPageBehaviors = () => {
     initProductDetailPricing();
     initPaymentProofPreview();
     initRefundRequirementToggle();
+    initWordReveal();
 };
 
 if (document.readyState === 'loading') {

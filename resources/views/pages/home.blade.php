@@ -7,7 +7,7 @@
     <div class="container home-hero-grid">
         <div class="home-hero-copy">
             <p class="home-eyebrow">UYUY JASTIP <span aria-hidden="true">/</span> JASA TITIP PARFUM</p>
-            <h1 id="homeHeroTitle">Temukan aroma pilihanmu.</h1>
+            <h1 id="homeHeroTitle" data-animate="words">Temukan aroma pilihanmu.</h1>
             <p>Pilih parfum, tentukan ukuran botol, lalu ikuti jadwal pre-order dan instruksi pembayaran yang tersedia.</p>
             <div class="home-hero-actions">
                 <a href="{{ route('catalog') }}" class="btn btn-dark">Jelajahi katalog <span aria-hidden="true">→</span></a>
@@ -45,7 +45,7 @@
         <header class="home-section-header">
             <div>
                 <p class="home-eyebrow">KOLEKSI PARFUM</p>
-                <h2 id="homeProductsTitle">Pilihan dari katalog</h2>
+                <h2 id="homeProductsTitle" data-animate="words">Pilihan dari katalog</h2>
             </div>
             <a href="{{ route('catalog') }}" class="home-text-link">Lihat seluruh produk <span aria-hidden="true">→</span></a>
         </header>
@@ -71,7 +71,7 @@
         <header class="home-section-header">
             <div>
                 <p class="home-eyebrow">ALUR PEMESANAN</p>
-                <h2 id="homeOrderTitle">Dari pilih parfum sampai pantau pesanan.</h2>
+                <h2 id="homeOrderTitle" data-animate="words">Dari pilih parfum sampai pantau pesanan.</h2>
             </div>
             <a href="{{ route('po.info') }}" class="home-text-link">Baca informasi PO <span aria-hidden="true">→</span></a>
         </header>
@@ -89,7 +89,7 @@
     <div class="container home-about-inner">
         <div>
             <p class="home-eyebrow">TENTANG UYUY JASTIP</p>
-            <h2 id="homeAboutTitle">Jastip parfum dengan alur yang jelas.</h2>
+            <h2 id="homeAboutTitle" data-animate="words">Jastip parfum dengan alur yang jelas.</h2>
         </div>
         <div>
             <p>Uyuy Jastip membantu pelanggan memesan pilihan parfum melalui periode pre-order. Informasi produk, ukuran, jadwal, dan status pesanan tersedia dalam satu alur.</p>

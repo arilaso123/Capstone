@@ -12,7 +12,7 @@
 
     <header class="po-information-header">
         <p class="home-eyebrow">JADWAL DAN PANDUAN</p>
-        <h1>Informasi pre-order</h1>
+        <h1 data-animate="words">Informasi pre-order</h1>
         <p>Ketahui jadwal pemesanan, pembayaran, dan cara memantau pesanan di Uyuy Jastip.</p>
     </header>
 
@@ -50,7 +50,7 @@
             <section class="po-faq-section" aria-labelledby="poFaqTitle">
                 <header>
                     <p class="home-eyebrow">PERTANYAAN UMUM</p>
-                    <h2 id="poFaqTitle">Panduan singkat pemesanan</h2>
+                    <h2 id="poFaqTitle" data-animate="words">Panduan singkat pemesanan</h2>
                 </header>
 
                 <div class="po-faq-list">
